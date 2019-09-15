@@ -59,13 +59,15 @@ proc swapEndian64(p: pointer) =
 proc parseEndian(str: cstring): WkbByteOrder =
   result = WkbByteOrder((hexbyte(str[0]) shl 4) or hexbyte(str[1]))
 
-proc parseGeometryType(str: cstring, bswap: bool): WkbGeometryType =
-  var bytes = cast[cstring](addr result) 
+proc parseGeometryType(str: cstring, bswap: bool): (WkbGeometryType, bool) =
+  var bytes = cast[cstring](addr result[0]) 
   for i in 1..5:
     bytes[i - 1] = chr((hexbyte(str[2 * i]) shl 4) or hexbyte(str[2 * i + 1]))
 
-  if bswap:
-    swapEndian32(bytes)
+  if bswap: swapEndian32(bytes)
+  if bytes[3] == chr(0x20):
+    bytes[3] = chr(0x00)
+    result[1] = true
 
 proc parseuint32(str: cstring, pos: var int, bswap: bool): uint32 =
   var bytes = cast[cstring](addr result)
@@ -82,7 +84,7 @@ proc parseCoord(str: cstring, pos: var int, bswap: bool): Coord =
   for i in 0..15:
     bytes[i] = chr((hexbyte(str[2 * pos]) shl 4) or hexbyte(str[2 * pos + 1]))
     inc pos
-  echo bswap
+
   if bswap:
     swapEndian64(addr result.x)
     swapEndian64(addr result.y)
@@ -93,25 +95,31 @@ proc parseCoords(str: cstring, pos: var int, bswap: bool): seq[Coord] =
     let coord = parseCoord(str, pos, bswap)
     result.add(coord)
 
-proc parseWkbPoint(str: cstring, bswap: bool): Point =
+proc parseWkbPoint(str: cstring, pos: var int, bswap: bool): Point =
   new(result)
-  var pos = 5
   result.coord = parseCoord(str, pos, bswap)
 
-proc parseWkbLineString(str: cstring, bswap: bool): LineString =
+proc parseWkbLineString(str: cstring, pos: var int, bswap: bool): LineString =
   new(result)
-  var pos = 5
   result.coords = parseCoords(str, pos, bswap)
 
 proc parseWkb(str: cstring): Geometry =
   let endian = parseEndian(str)
   let bswap = (endian == WkbByteOrder(system.cpuEndian)) # littleEndian = 0, but wkbNDR = 1
-  let wkbType = parseGeometryType(str, bswap)
+  let (wkbType, hasSrid) = parseGeometryType(str, bswap)
+  var pos = 5 # 解析的起点
+  var srid: uint32
+  if hasSrid: srid = parseuint32(str, pos, bswap)
+
   case wkbType:
   of wkbPoint:
-    result = Geometry(kind: wkbPoint, pt: parseWkbPoint(str, bswap))
+    var pt = parseWkbPoint(str, pos, bswap)
+    if hasSrid: pt.srid = srid
+    result = Geometry(kind: wkbPoint, pt: pt)
   of wkbLineString:
-    result = Geometry(kind:  wkbLineString, ls: parseWkbLineString(str, bswap))
+    var ls = parseWkbLineString(str, pos, bswap)
+    if hasSrid: ls.srid = srid
+    result = Geometry(kind:  wkbLineString, ls: ls)
   else: discard
 
 when isMainModule:
@@ -124,13 +132,21 @@ when isMainModule:
   #           "000000000000F03F"&
   #           "0000000000000040"&
   #           "0000000000000040"
-  let wkb = "00"&
-            "00000002"&
-            "00000002"&
-            "3FF0000000000000"&
-            "3FF0000000000000"&
-            "4000000000000000"&
-            "4000000000000000"
+  # let wkb = "00"&
+  #           "00000002"&
+  #           "00000002"&
+  #           "3FF0000000000000"&
+  #           "3FF0000000000000"&
+  #           "4000000000000000"&
+  #           "4000000000000000"
+  let wkb = "01"&
+            "02000020"&
+            "E6100000"&
+            "02000000"&
+            "000000000000F03F"&
+            "000000000000F03F"&
+            "0000000000000040"&
+            "0000000000000040"
   var p = parseWkb(wkb)
   echo repr p
 

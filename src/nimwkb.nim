@@ -65,9 +65,12 @@ proc parseGeometryType(str: cstring, bswap: bool): (WkbGeometryType, bool) =
     bytes[i - 1] = chr((hexbyte(str[2 * i]) shl 4) or hexbyte(str[2 * i + 1]))
 
   if bswap: swapEndian32(bytes)
+  # check has srid
   if bytes[3] == chr(0x20):
     bytes[3] = chr(0x00)
     result[1] = true
+  else:
+    result[1] = false
 
 proc parseuint32(str: cstring, pos: var int, bswap: bool): uint32 =
   var bytes = cast[cstring](addr result)
@@ -105,8 +108,11 @@ proc parseWkbLineString(str: cstring, pos: var int, bswap: bool): LineString =
 
 proc parseWkb(str: cstring): Geometry =
   let endian = parseEndian(str)
+  echo endian
   let bswap = (endian == WkbByteOrder(system.cpuEndian)) # littleEndian = 0, but wkbNDR = 1
+  echo bswap
   let (wkbType, hasSrid) = parseGeometryType(str, bswap)
+  echo hasSrid
   var pos = 5 # 解析的起点
   var srid: uint32
   if hasSrid: srid = parseuint32(str, pos, bswap)
@@ -123,8 +129,14 @@ proc parseWkb(str: cstring): Geometry =
   else: discard
 
 when isMainModule:
-  # let wkb = "0101000000000000000000F03F000000000000F03F" # little endian
-  # let wkb = "00000000013FF00000000000003FF0000000000000" # big endian
+  # let wkb = "01"&
+  #           "01000000"&
+  #           "000000000000F03F"&
+  #           "000000000000F03F" # little endian
+  let wkb = "00"&
+            "00000001"&
+            "3FF0000000000000"&
+            "3FF0000000000000" # big endian
   # let wkb = "01"&
   #           "02000000"&
   #           "02000000"&
@@ -139,14 +151,14 @@ when isMainModule:
   #           "3FF0000000000000"&
   #           "4000000000000000"&
   #           "4000000000000000"
-  let wkb = "01"&
-            "02000020"&
-            "E6100000"&
-            "02000000"&
-            "000000000000F03F"&
-            "000000000000F03F"&
-            "0000000000000040"&
-            "0000000000000040"
+  # let wkb = "01"&
+  #           "02000020"&
+  #           "E6100000"&# with srid = 4326
+  #           "02000000"&
+  #           "000000000000F03F"&
+  #           "000000000000F03F"&
+  #           "0000000000000040"&
+  #           "0000000000000040"
   var p = parseWkb(wkb)
   echo repr p
 

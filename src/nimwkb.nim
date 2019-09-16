@@ -45,7 +45,23 @@ type
     of wkbPoint:
       pt*: Point
     of wkbLineString:
-      ls: LineString
+      ls*: LineString
+    else: discard
+
+proc `==`*(a, b: Coord): bool =
+  return (a.x == b.x) and (a.y == b.y)
+
+proc `==`*(a, b: Point): bool =
+  return (a.srid == b.srid) and (a.coord.x == b.coord.x) and (a.coord.y == b.coord.y)
+
+proc `==`*(a, b: LineString): bool =
+  return (a.srid == b.srid) and (a.coords == b.coords)
+
+proc `==`*(a, b: Geometry): bool =
+  result = a.kind == b.kind
+  case a.kind:
+    of wkbPoint: result = result and (a.pt == b.pt)
+    of wkbLineString: result = result and (a.ls == b.ls)
     else: discard
 
 proc swapEndian32(p: pointer) =
@@ -106,13 +122,13 @@ proc parseWkbLineString(str: cstring, pos: var int, bswap: bool): LineString =
   new(result)
   result.coords = parseCoords(str, pos, bswap)
 
-proc parseWkb(str: cstring): Geometry =
+proc parseWkb*(str: cstring): Geometry =
   let endian = parseEndian(str)
-  echo endian
+  # echo endian
   let bswap = (endian == WkbByteOrder(system.cpuEndian)) # littleEndian = 0, but wkbNDR = 1
-  echo bswap
+  # echo bswap
   let (wkbType, hasSrid) = parseGeometryType(str, bswap)
-  echo hasSrid
+  # echo hasSrid
   var pos = 5 # 解析的起点
   var srid: uint32
   if hasSrid: srid = parseuint32(str, pos, bswap)
@@ -133,17 +149,17 @@ when isMainModule:
   #           "01000000"&
   #           "000000000000F03F"&
   #           "000000000000F03F" # little endian
-  let wkb = "00"&
-            "00000001"&
-            "3FF0000000000000"&
-            "3FF0000000000000" # big endian
-  # let wkb = "01"&
-  #           "02000000"&
-  #           "02000000"&
-  #           "000000000000F03F"&
-  #           "000000000000F03F"&
-  #           "0000000000000040"&
-  #           "0000000000000040"
+  # let wkb = "00"&
+  #           "00000001"&
+  #           "3FF0000000000000"&
+  #           "3FF0000000000000" # big endian
+  let wkb = "01"&
+            "02000000"&
+            "02000000"&
+            "000000000000F03F"&
+            "000000000000F03F"&
+            "0000000000000040"&
+            "0000000000000040"
   # let wkb = "00"&
   #           "00000002"&
   #           "00000002"&

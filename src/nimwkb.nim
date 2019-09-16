@@ -1,11 +1,12 @@
 import oids, strutils, endians
 
 type
-  WkbByteOrder*{.size: sizeof(cint).} = enum
+  WkbByteOrder* = enum
     wkbXDR  # Big Endian
     wkbNDR  # Little Endian
 
-  WkbGeometryType*{.size: sizeof(cint).} = enum
+  # fix the size: 4byte, write directly
+  WkbGeometryType*{.size: sizeof(cint).} = enum 
     wkbNull
     wkbPoint
     wkbLineString
@@ -79,7 +80,7 @@ proc swapEndian64(p: pointer) =
   (o[0], o[1], o[2], o[3], o[4], o[5], o[6], o[7]) = (o[7], o[6], o[5], o[4], o[3], o[2], o[1], o[0])
 
 proc parseEndian(str: cstring): WkbByteOrder =
-  result = WkbByteOrder((hexbyte(str[0]) shl 4) or hexbyte(str[1]))
+  return WkbByteOrder((hexbyte(str[0]) shl 4) or hexbyte(str[1]))
 
 proc parseGeometryType(str: cstring, bswap: bool): (WkbGeometryType, bool) =
   var bytes = cast[cstring](addr result[0]) 

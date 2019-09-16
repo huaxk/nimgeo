@@ -46,6 +46,8 @@ type
       pt*: Point
     of wkbLineString:
       ls*: LineString
+    of wkbPolygon:
+      pg*: Polygon
     else: discard
 
 proc `==`*(a, b: Coord): bool =
@@ -57,11 +59,15 @@ proc `==`*(a, b: Point): bool =
 proc `==`*(a, b: LineString): bool =
   return (a.srid == b.srid) and (a.coords == b.coords)
 
+proc `==`*(a, b: Polygon): bool =
+  return (a.srid == b.srid) and (a.rings == b.rings)
+
 proc `==`*(a, b: Geometry): bool =
   result = a.kind == b.kind
   case a.kind:
     of wkbPoint: result = result and (a.pt == b.pt)
     of wkbLineString: result = result and (a.ls == b.ls)
+    of wkbPolygon: result = result and (a.pg == b.pg)
     else: discard
 
 proc swapEndian32(p: pointer) =
@@ -114,6 +120,12 @@ proc parseCoords(str: cstring, pos: var int, bswap: bool): seq[Coord] =
     let coord = parseCoord(str, pos, bswap)
     result.add(coord)
 
+proc parseRings(str: cstring, pos: var int, bswap: bool): seq[seq[Coord]] =
+  let ringnum = parseuint32(str, pos, bswap)
+  for i in 1..ringnum:
+    let coords = parseCoords(str, pos, bswap)
+    result.add(coords)
+
 proc parseWkbPoint(str: cstring, pos: var int, bswap: bool): Point =
   new(result)
   result.coord = parseCoord(str, pos, bswap)
@@ -121,6 +133,10 @@ proc parseWkbPoint(str: cstring, pos: var int, bswap: bool): Point =
 proc parseWkbLineString(str: cstring, pos: var int, bswap: bool): LineString =
   new(result)
   result.coords = parseCoords(str, pos, bswap)
+
+proc parseWkbPolygon(str: cstring, pos: var int, bswap: bool): Polygon =
+  new(result)
+  result.rings = parseRings(str, pos, bswap)
 
 proc parseWkb*(str: cstring): Geometry =
   let endian = parseEndian(str)
@@ -142,4 +158,8 @@ proc parseWkb*(str: cstring): Geometry =
     var ls = parseWkbLineString(str, pos, bswap)
     if hasSrid: ls.srid = srid
     result = Geometry(kind:  wkbLineString, ls: ls)
+  of wkbPolygon:
+    var pg = parseWkbPolygon(str, pos, bswap)
+    if hasSrid: pg.srid = srid
+    result = Geometry(kind: wkbPolygon, pg: pg)
   else: discard

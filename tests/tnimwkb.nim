@@ -11,7 +11,7 @@ import nimwkb
 
 const srid = 4326'u32
 
-# Point
+#  Point
 let pt = Coord(x: 1.0, y: 2.0)
 const wkbnpt = "01"&# little endian
                "01000000"&
@@ -35,7 +35,7 @@ const wkbxspt = "00"&# big endian
 suite "parse Point wkb hex string":
   test "little endian wkb":
     check parseWkb(wkbnpt) == Geometry(kind: wkbPoint,
-                                        pt: Point(srid: 0, coord: pt))
+                                        pt: Point(coord: pt))
 
   test "little endian wkb with srid":
     check parseWkb(wkbnspt) == Geometry(kind: wkbPoint,
@@ -43,14 +43,14 @@ suite "parse Point wkb hex string":
   
   test "big endian wkb":
     check parseWkb(wkbxpt) == Geometry(kind: wkbPoint,
-                                        pt: Point(srid: 0, coord: pt))
+                                        pt: Point(coord: pt))
 
   test "big endian wkb with srid":
     check parseWkb(wkbxspt) == Geometry(kind: wkbPoint,
                                         pt: Point(srid: srid, coord: pt))
 
-# LineString     
-var ls = @[Coord(x: 1.0, y: 1.0), Coord(x: 2.0, y: 2.0)]
+#  LineString     
+let ls = @[Coord(x: 1.0, y: 1.0), Coord(x: 2.0, y: 2.0)]
 const wkbnls = "01"&
                "02000000"&
                "02000000"&
@@ -86,7 +86,7 @@ const wkbxsls = "00"&
 suite "parse LineString wkb hex string":
   test "little endian wkb":
     check parseWkb(wkbnls) == Geometry(kind: wkbLineString,
-                                        ls: LineString(srid: 0, coords: ls))
+                                        ls: LineString(coords: ls))
 
   test "little endian wkb with srid":
     check parseWkb(wkbnsls) == Geometry(kind: wkbLineString,
@@ -94,14 +94,14 @@ suite "parse LineString wkb hex string":
 
   test "big endian wkb":
     check parseWkb(wkbxls) == Geometry(kind: wkbLineString,
-                                        ls: LineString(srid: 0, coords:ls))
+                                        ls: LineString(coords:ls))
 
   test "big endian wkb with srid":
     check parseWkb(wkbxsls) == Geometry(kind: wkbLineString,
                                         ls: LineString(srid: srid, coords: ls))
 
-# Polygon      
-var pg = @[
+#  Polygon      
+let pg = @[
            @[Coord(x: 1.0, y: 1.0), Coord(x: 2.0, y: 2.0), Coord(x: 3.0, y: 3.0), Coord(x: 1.0, y: 1.0)],
            @[Coord(x:4.0, y: 4.0), Coord(x: 5.0, y: 5.0), Coord(x: 6.0, y: 6.0), Coord(x: 4.0, y: 4.0)]
           ]    
@@ -197,7 +197,7 @@ const wkbxspg = "00"&
 suite "parse Polygon wkb hex string":
   test "little endian wkb":
     check parseWkb(wkbnpg) == Geometry(kind: wkbPolygon,
-                                       pg: Polygon(srid: 0, rings: pg))
+                                       pg: Polygon(rings: pg))
 
   test "little endian wkb with srid":
     check parseWkb(wkbnspg) == Geometry(kind: wkbPolygon,
@@ -205,8 +205,28 @@ suite "parse Polygon wkb hex string":
 
   test "big endian wkb":
     check parseWkb(wkbxpg) == Geometry(kind: wkbPolygon,
-                                       pg: Polygon(srid: 0, rings:pg))
+                                       pg: Polygon(rings:pg))
 
   test "big endian wkb with srid":
     check parseWkb(wkbxspg) == Geometry(kind: wkbPolygon,
                                        pg: Polygon(srid: srid, rings:pg))
+
+#  MultiPoint
+let mp = @[Point(coord: Coord(x: 1.0, y: 1.0)), 
+           Point(coord: Coord(x: 2.0, y: 2.0))]
+const wkbnmp = "01"&
+               "04000000"&
+               "02000000"&# number of point
+               "01"&
+               "01000000"&
+               "000000000000F03F"&
+               "000000000000F03F"&
+               "01"&
+               "01000000"&
+               "0000000000000040"&
+               "0000000000000040"
+
+suite "parse MultiPoint wkb hex string":
+  test "little endian wkb":
+    check parseWkb(wkbnmp) == Geometry(kind: wkbMultiPoint,
+                                       mp: MultiPoint(points: mp))

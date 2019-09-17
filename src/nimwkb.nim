@@ -36,9 +36,10 @@ type
     srid*: uint32
     rings*: seq[seq[Coord]]
 
-  MultiPoint* = object
+  MultiPoint* = ref MultiPointObj
+  MultiPointObj* = object
     srid*: uint32
-    points: seq[Point]
+    points*: seq[Point]
 
   Geometry* = ref GeometryObj
   GeometryObj* = object
@@ -49,6 +50,8 @@ type
       ls*: LineString
     of wkbPolygon:
       pg*: Polygon
+    of wkbMultiPoint:
+      mp*: MultiPoint
     else: discard
 
 proc `==`*(a, b: Coord): bool =
@@ -63,12 +66,16 @@ proc `==`*(a, b: LineString): bool =
 proc `==`*(a, b: Polygon): bool =
   return (a.srid == b.srid) and (a.rings == b.rings)
 
+proc `==`*(a, b: MultiPoint): bool =
+  return (a.srid == b.srid) and (a.points == b.points)
+
 proc `==`*(a, b: Geometry): bool =
   result = a.kind == b.kind
   case a.kind:
     of wkbPoint: result = result and (a.pt == b.pt)
     of wkbLineString: result = result and (a.ls == b.ls)
     of wkbPolygon: result = result and (a.pg == b.pg)
+    of wkbMultiPoint: result = result and (a.mp == b.mp)
     else: discard
 
 proc swapEndian32(p: pointer) =
@@ -79,13 +86,20 @@ proc swapEndian64(p: pointer) =
   var o = cast[cstring](p)
   (o[0], o[1], o[2], o[3], o[4], o[5], o[6], o[7]) = (o[7], o[6], o[5], o[4], o[3], o[2], o[1], o[0])
 
-proc parseEndian(str: cstring): WkbByteOrder =
-  return WkbByteOrder((hexbyte(str[0]) shl 4) or hexbyte(str[1]))
+proc parseEndian(str: cstring, pos: var int): WkbByteOrder =
+  # echo str
+  let c = (hexbyte(str[2 * pos]) shl 4) or hexbyte(str[2 * pos + 1])
+  result = WkbByteOrder(c)
+  # echo($(pos*2), "->", str[pos], str[pos + 1], str[pos + 2], str[pos + 3], str[pos + 4], str[pos + 5], str[pos + 6], str[pos + 7])
+  inc pos
+  # echo($(pos*2), "->", $result)
 
-proc parseGeometryType(str: cstring, bswap: bool): (WkbGeometryType, bool) =
+proc parseGeometryType(str: cstring, pos: var int, bswap: bool):
+                      (WkbGeometryType, bool) =
   var bytes = cast[cstring](addr result[0]) 
-  for i in 1..5:
-    bytes[i - 1] = chr((hexbyte(str[2 * i]) shl 4) or hexbyte(str[2 * i + 1]))
+  for i in 0..3:
+    bytes[i] = chr((hexbyte(str[2 * pos]) shl 4) or hexbyte(str[2 * pos + 1]))
+    inc(pos)
 
   if bswap: swapEndian32(bytes)
   # check has srid
@@ -94,6 +108,8 @@ proc parseGeometryType(str: cstring, bswap: bool): (WkbGeometryType, bool) =
     result[1] = true
   else:
     result[1] = false
+  
+  # echo($(pos*2), "->", $result[0], ", hasSrid: ", result[1])
 
 proc parseuint32(str: cstring, pos: var int, bswap: bool): uint32 =
   var bytes = cast[cstring](addr result)
@@ -103,6 +119,8 @@ proc parseuint32(str: cstring, pos: var int, bswap: bool): uint32 =
   
   if bswap:
     swapEndian32(bytes)
+  
+  # echo($(pos*2), "->", $result)
 
 proc parseCoord(str: cstring, pos: var int, bswap: bool): Coord =
   new(result)
@@ -114,6 +132,8 @@ proc parseCoord(str: cstring, pos: var int, bswap: bool): Coord =
   if bswap:
     swapEndian64(addr result.x)
     swapEndian64(addr result.y)
+  
+  # echo("(", result.x, ",", result.y, ")")
 
 proc parseCoords(str: cstring, pos: var int, bswap: bool): seq[Coord] =
   let n = parseuint32(str, pos, bswap)
@@ -139,14 +159,22 @@ proc parseWkbPolygon(str: cstring, pos: var int, bswap: bool): Polygon =
   new(result)
   result.rings = parseRings(str, pos, bswap)
 
-proc parseWkb*(str: cstring): Geometry =
-  let endian = parseEndian(str)
-  # echo endian
-  let bswap = (endian == WkbByteOrder(system.cpuEndian)) # littleEndian = 0, but wkbNDR = 1
-  # echo bswap
-  let (wkbType, hasSrid) = parseGeometryType(str, bswap)
-  # echo hasSrid
-  var pos = 5 # 解析的起点
+#  forward declaration
+proc parseGeometry*(str: cstring, pos: var int, bswap = false): Geometry
+
+proc parseMultiPoint(str: cstring, pos: var int, bswap: bool): MultiPoint =
+  new(result)
+  let pointnum = parseuint32(str, pos, bswap)
+  for i in 1..pointnum:
+    let geo = parseGeometry(str, pos, bswap)
+    result.points.add(geo.pt)
+
+proc parseGeometry*(str: cstring, pos: var int, bswap = false): Geometry =
+  let endian = parseEndian(str, pos)
+  #  littleEndian = 0, but wkbNDR = 1
+  let bswap = (endian == WkbByteOrder(system.cpuEndian))
+  let (wkbType, hasSrid) = parseGeometryType(str, pos, bswap)
+
   var srid: uint32
   if hasSrid: srid = parseuint32(str, pos, bswap)
 
@@ -154,13 +182,21 @@ proc parseWkb*(str: cstring): Geometry =
   of wkbPoint:
     var pt = parseWkbPoint(str, pos, bswap)
     if hasSrid: pt.srid = srid
-    result = Geometry(kind: wkbPoint, pt: pt)
+    return Geometry(kind: wkbPoint, pt: pt)
   of wkbLineString:
     var ls = parseWkbLineString(str, pos, bswap)
     if hasSrid: ls.srid = srid
-    result = Geometry(kind:  wkbLineString, ls: ls)
+    return Geometry(kind:  wkbLineString, ls: ls)
   of wkbPolygon:
     var pg = parseWkbPolygon(str, pos, bswap)
     if hasSrid: pg.srid = srid
-    result = Geometry(kind: wkbPolygon, pg: pg)
+    return Geometry(kind: wkbPolygon, pg: pg)
+  of wkbMultiPoint:
+    var mp = parseMultiPoint(str, pos, bswap)
+    if hasSrid: mp.srid = srid
+    return Geometry(kind: wkbMultiPoint, mp: mp)
   else: discard
+
+proc parseWkb*(str: cstring): Geometry =
+  var pos = 0 #  解析的起点
+  return parseGeometry(str, pos)

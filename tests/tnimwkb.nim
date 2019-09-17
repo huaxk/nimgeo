@@ -5,9 +5,11 @@
 #
 # To run these tests, simply execute `nimble test`.
 
-import unittest
+import unittest, logging
 
 import nimwkb
+
+# addHandler(newConsoleLogger(levelThreshold = lvlDebug))
 
 const srid = 4326'u32
 

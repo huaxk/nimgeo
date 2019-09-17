@@ -1,4 +1,5 @@
-import oids, strutils, endians
+import logging
+from oids import hexbyte
 
 type
   WkbByteOrder* = enum
@@ -87,12 +88,10 @@ proc swapEndian64(p: pointer) =
   (o[0], o[1], o[2], o[3], o[4], o[5], o[6], o[7]) = (o[7], o[6], o[5], o[4], o[3], o[2], o[1], o[0])
 
 proc parseEndian(str: cstring, pos: var int): WkbByteOrder =
-  # echo str
   let c = (hexbyte(str[2 * pos]) shl 4) or hexbyte(str[2 * pos + 1])
   result = WkbByteOrder(c)
-  # echo($(pos*2), "->", str[pos], str[pos + 1], str[pos + 2], str[pos + 3], str[pos + 4], str[pos + 5], str[pos + 6], str[pos + 7])
-  inc pos
-  # echo($(pos*2), "->", $result)
+  inc(pos)
+  log(lvlDebug, "end position: ", $(pos * 2), " -> ", $result)
 
 proc parseGeometryType(str: cstring, pos: var int, bswap: bool):
                       (WkbGeometryType, bool) =
@@ -109,7 +108,7 @@ proc parseGeometryType(str: cstring, pos: var int, bswap: bool):
   else:
     result[1] = false
   
-  # echo($(pos*2), "->", $result[0], ", hasSrid: ", result[1])
+  log(lvlDebug, "end position: ", $(pos * 2), " -> ", $result)
 
 proc parseuint32(str: cstring, pos: var int, bswap: bool): uint32 =
   var bytes = cast[cstring](addr result)
@@ -120,7 +119,7 @@ proc parseuint32(str: cstring, pos: var int, bswap: bool): uint32 =
   if bswap:
     swapEndian32(bytes)
   
-  # echo($(pos*2), "->", $result)
+  log(lvlDebug, "end position: ", $(pos * 2), " -> ", $result)
 
 proc parseCoord(str: cstring, pos: var int, bswap: bool): Coord =
   new(result)
@@ -132,8 +131,9 @@ proc parseCoord(str: cstring, pos: var int, bswap: bool): Coord =
   if bswap:
     swapEndian64(addr result.x)
     swapEndian64(addr result.y)
-  
-  # echo("(", result.x, ",", result.y, ")")
+
+  log(lvlDebug, "end position: ", $(pos * 2), " -> ",
+      "(", result.x, ",", result.y, ")") 
 
 proc parseCoords(str: cstring, pos: var int, bswap: bool): seq[Coord] =
   let n = parseuint32(str, pos, bswap)
@@ -198,5 +198,6 @@ proc parseGeometry*(str: cstring, pos: var int, bswap = false): Geometry =
   else: discard
 
 proc parseWkb*(str: cstring): Geometry =
+  log(lvlDebug, "WKB: ", str)
   var pos = 0 #  解析的起点
   return parseGeometry(str, pos)

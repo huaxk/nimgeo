@@ -363,18 +363,194 @@ const wkbxsmls = "00"&
 suite "parse MultiLineString wkb hex string":
   test "little endian wkb":
     check parseWkb(wkbnmls) == Geometry(kind: wkbMultiLineString,
-                                       mls: MultiLineString(lineStrings: mls))
+                                       mls: MultiLineString(linestrings: mls))
 
   test "little endian wkb with srid":
     check parseWkb(wkbnsmls) == Geometry(kind: wkbMultiLineString,
                                         mls: MultiLineString(srid: srid,
-                                          lineStrings: mls))
+                                          linestrings: mls))
 
   test "big endian wkb":
     check parseWkb(wkbxmls) == Geometry(kind: wkbMultiLineString,
-                                        mls: MultiLineString(lineStrings: mls))
+                                        mls: MultiLineString(linestrings: mls))
 
   test "big endian wkb with srid":
     check parseWkb(wkbxsmls) == Geometry(kind: wkbMultiLineString,
                                           mls: MultiLineString(srid: srid,
-                                            lineStrings: mls))
+                                            linestrings: mls))
+
+let mpg = @[
+            Polygon(rings: @[
+              @[Coord(x: 1.0, y: 1.0), Coord(x: 2.0, y: 2.0),
+                Coord(x: 3.0, y: 3.0), Coord(x: 1.0, y: 1.0)]
+            ]),
+            Polygon(rings: @[
+              @[Coord(x: 3.0, y: 3.0), Coord(x: 4.0, y: 4.0),
+                Coord(x: 5.0, y: 5.0), Coord(x: 3.0, y: 3.0)],
+              @[Coord(x: 6.0, y: 6.0), Coord(x: 7.0, y: 7.0),
+                Coord(x: 8.0, y: 8.0), Coord(x: 6.0, y: 6.0)]
+            ])
+          ]
+const wkbnmpg = "01"&
+                "06000000"&
+                "02000000"&# number of Ploygon
+                "01"&
+                "03000000"&# Ploygon
+                "01000000"&# number of rings
+                "04000000"&# number of points
+                "000000000000F03F"&
+                "000000000000F03F"&
+                "0000000000000040"&
+                "0000000000000040"&
+                "0000000000000840"&
+                "0000000000000840"&
+                "000000000000F03F"&
+                "000000000000F03F"&
+                "01"&
+                "03000000"&# Ploygon
+                "02000000"&# number of rings
+                "04000000"&# number of points
+                "0000000000000840"&
+                "0000000000000840"&
+                "0000000000001040"&
+                "0000000000001040"&
+                "0000000000001440"&
+                "0000000000001440"&
+                "0000000000000840"&
+                "0000000000000840"&
+                "04000000"&# number of points
+                "0000000000001840"&
+                "0000000000001840"&
+                "0000000000001C40"&
+                "0000000000001C40"&
+                "0000000000002040"&
+                "0000000000002040"&
+                "0000000000001840"&
+                "0000000000001840"
+const wkbnsmpg =  "01"&
+                  "06000020"&
+                  "E6100000"&#  srid = 4326
+                  "02000000"&# number of Ploygon
+                  "01"&
+                  "03000000"&# Ploygon
+                  "01000000"&# number of rings
+                  "04000000"&# number of points
+                  "000000000000F03F"&
+                  "000000000000F03F"&
+                  "0000000000000040"&
+                  "0000000000000040"&
+                  "0000000000000840"&
+                  "0000000000000840"&
+                  "000000000000F03F"&
+                  "000000000000F03F"&
+                  "01"&
+                  "03000000"&# Ploygon
+                  "02000000"&# number of rings
+                  "04000000"&# number of points
+                  "0000000000000840"&
+                  "0000000000000840"&
+                  "0000000000001040"&
+                  "0000000000001040"&
+                  "0000000000001440"&
+                  "0000000000001440"&
+                  "0000000000000840"&
+                  "0000000000000840"&
+                  "04000000"&# number of points
+                  "0000000000001840"&
+                  "0000000000001840"&
+                  "0000000000001C40"&
+                  "0000000000001C40"&
+                  "0000000000002040"&
+                  "0000000000002040"&
+                  "0000000000001840"&
+                  "0000000000001840"
+const wkbxmpg = "00"&
+                "00000006"&
+                "00000002"&# number of Ploygon
+                "00"&
+                "00000003"&# Ploygon
+                "00000001"&# number of rings
+                "00000004"&# number of points
+                "3FF0000000000000"&
+                "3FF0000000000000"&
+                "4000000000000000"&
+                "4000000000000000"&
+                "4008000000000000"&
+                "4008000000000000"&
+                "3FF0000000000000"&
+                "3FF0000000000000"&
+                "00"&
+                "00000003"&# Ploygon
+                "00000002"&# number of rings
+                "00000004"&# number of points
+                "4008000000000000"&
+                "4008000000000000"&
+                "4010000000000000"&
+                "4010000000000000"&
+                "4014000000000000"&
+                "4014000000000000"&
+                "4008000000000000"&
+                "4008000000000000"&
+                "00000004"&# number of points
+                "4018000000000000"&
+                "4018000000000000"&
+                "401C000000000000"&
+                "401C000000000000"&
+                "4020000000000000"&
+                "4020000000000000"&
+                "4018000000000000"&
+                "4018000000000000"
+const wkbxsmpg =  "00"&
+                  "20000006"&
+                  "000010E6"&#  srid = 4326
+                  "00000002"&# number of Ploygon
+                  "00"&
+                  "00000003"&# Ploygon
+                  "00000001"&# number of rings
+                  "00000004"&# number of points
+                  "3FF0000000000000"&
+                  "3FF0000000000000"&
+                  "4000000000000000"&
+                  "4000000000000000"&
+                  "4008000000000000"&
+                  "4008000000000000"&
+                  "3FF0000000000000"&
+                  "3FF0000000000000"&
+                  "00"&
+                  "00000003"&# Ploygon
+                  "00000002"&# number of rings
+                  "00000004"&# number of points
+                  "4008000000000000"&
+                  "4008000000000000"&
+                  "4010000000000000"&
+                  "4010000000000000"&
+                  "4014000000000000"&
+                  "4014000000000000"&
+                  "4008000000000000"&
+                  "4008000000000000"&
+                  "00000004"&# number of points
+                  "4018000000000000"&
+                  "4018000000000000"&
+                  "401C000000000000"&
+                  "401C000000000000"&
+                  "4020000000000000"&
+                  "4020000000000000"&
+                  "4018000000000000"&
+                  "4018000000000000"
+
+suite "parse MultiPolygon wkb hex string":
+  test "little endian wkb":
+    check parseWkb(wkbnmpg) == Geometry(kind: wkbMultiPolygon,
+                                        mpg: MultiPolygon(polygons: mpg))
+  test "little endian wkb with srid":
+    check parseWkb(wkbnsmpg) == Geometry(kind: wkbMultiPolygon,
+                                         mpg: MultiPolygon(srid: srid, 
+                                           polygons: mpg))
+  test "big endian wkb":
+    check parseWkb(wkbxmpg) == Geometry(kind: wkbMultiPolygon,
+                                        mpg: MultiPolygon(polygons: mpg))
+
+  test "big endian wkb with srid":
+    check parseWkb(wkbxsmpg) == Geometry(kind: wkbMultiPolygon,
+                                         mpg: MultiPolygon(srid: srid,
+                                           polygons: mpg))

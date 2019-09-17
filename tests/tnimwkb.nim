@@ -228,7 +228,57 @@ const wkbnmp = "01"&
                "0000000000000040"&
                "0000000000000040"
 
+const wkbnsmp = "01"&
+                "04000020"&
+                "E6100000"&#  srid = 4326
+                "02000000"&# number of point
+                "01"&
+                "01000000"&
+                "000000000000F03F"&
+                "000000000000F03F"&
+                "01"&
+                "01000000"&
+                "0000000000000040"&
+                "0000000000000040"
+
+const wkbxmp = "00"&
+               "00000004"&
+               "00000002"&# number of point
+               "00"&
+               "00000001"&
+               "3FF0000000000000"&
+               "3FF0000000000000"&
+               "00"&
+               "00000001"&
+               "4000000000000000"&
+               "4000000000000000"                
+
+const wkbxsmp = "00"&
+                "20000004"&
+                "000010E6"&
+                "00000002"&# number of point
+                "00"&
+                "00000001"&
+                "3FF0000000000000"&
+                "3FF0000000000000"&
+                "00"&
+                "00000001"&
+                "4000000000000000"&
+                "4000000000000000" 
+
 suite "parse MultiPoint wkb hex string":
   test "little endian wkb":
     check parseWkb(wkbnmp) == Geometry(kind: wkbMultiPoint,
                                        mp: MultiPoint(points: mp))
+
+  test "little endian wkb with srid":
+    check parseWkb(wkbnsmp) == Geometry(kind: wkbMultiPoint,
+                                        mp: MultiPoint(srid: srid, points: mp))
+
+  test "big endian wkb":
+    check parseWkb(wkbxmp) == Geometry(kind: wkbMultiPoint,
+                                       mp: MultiPoint(points: mp))
+
+  test "big endian wkb with srid":
+    check parseWkb(wkbxsmp) == Geometry(kind: wkbMultiPoint,
+                                       mp: MultiPoint(srid: srid, points: mp))

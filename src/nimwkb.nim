@@ -8,8 +8,8 @@ type
 
   # fix the size: 4byte, write bytes directly
   WkbGeometryType*{.size: sizeof(cint).} = enum 
-    wkbNull
-    wkbPoint
+    # wkbNull
+    wkbPoint = 1
     wkbLineString
     wkbPolygon
     wkbMultiPoint
@@ -52,6 +52,10 @@ type
     srid*: uint32
     polygons*: seq[Polygon]
 
+  GeometryCollection* = ref GeometryCollectionObj
+  GeometryCollectionObj* = object
+    geometries*: seq[Geometry] #  Todo: 可能出现自引用
+
   Geometry* = ref GeometryObj
   GeometryObj* = object
     case kind*: WkbGeometryType
@@ -67,7 +71,8 @@ type
       mls*: MultiLineString
     of wkbMultiPolygon:
       mpg*: MultiPolygon      
-    else: discard
+    of wkbGeometryCollection:
+      gc*: GeometryCollection
 
 proc `==`*(a, b: Coord): bool =
   return (a.x == b.x) and (a.y == b.y)
@@ -90,8 +95,17 @@ proc `==`*(a, b: MultiLineString): bool =
 proc `==`*(a, b: MultiPolygon): bool =
   return (a.srid == b.srid) and (a.polygons == b.polygons)
 
+proc `==`*(a, b: GeometryCollection): bool =
+  result = a.geometries.len == b.geometries.len
+  if not result: return
+  
+  for i in 0..<a.geometries.len:
+    let geoequal = a.geometries[i] == b.geometries[i]
+    if not geoequal: result = result and geoequal
+
 proc `==`*(a, b: Geometry): bool =
   result = a.kind == b.kind
+  if not result: return    
   case a.kind:
     of wkbPoint: result = result and (a.pt == b.pt)
     of wkbLineString: result = result and (a.ls == b.ls)
@@ -99,7 +113,7 @@ proc `==`*(a, b: Geometry): bool =
     of wkbMultiPoint: result = result and (a.mpt == b.mpt)
     of wkbMultiLineString: result = result and (a.mls == b.mls)
     of wkbMultiPolygon: result = result and (a.mpg == b.mpg)
-    else: discard
+    of wkbGeometryCollection: result = result and (a.gc == b.gc)
 
 proc swapEndian32(p: pointer) =
   var o = cast[cstring](p)
@@ -207,6 +221,15 @@ proc parseWkbMultiPolygon(str: cstring, pos: var int, bswap: bool):
     let geo = parseGeometry(str, pos, bswap) #  Ploygon
     result.polygons.add(geo.pg)
 
+proc parseGeometryCollection(str: cstring, pos: var int, bswap: bool): 
+                             GeometryCollection =
+  new(result)
+  let gcnum = parseuint32(str, pos, bswap)
+  for i in 1..gcnum:
+    let geo = parseGeometry(str, pos, bswap)
+    result.geometries.add(geo)
+  
+
 proc parseGeometry*(str: cstring, pos: var int, bswap = false): Geometry =
   let endian = parseEndian(str, pos)
   #  littleEndian = 0, but wkbNDR = 1
@@ -241,7 +264,9 @@ proc parseGeometry*(str: cstring, pos: var int, bswap = false): Geometry =
     var mpg = parseWkbMultiPolygon(str, pos, bswap)
     if hasSrid: mpg.srid = srid
     return Geometry(kind: wkbMultiPolygon, mpg: mpg)
-  else: discard
+  of wkbGeometryCollection:
+    var gc = parseGeometryCollection(str, pos, bswap)
+    return Geometry(kind: wkbGeometryCollection, gc: gc)
 
 proc parseWkb*(str: cstring): Geometry =
   log(lvlDebug, "WKB: ", str)

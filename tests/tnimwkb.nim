@@ -214,23 +214,10 @@ suite "parse Polygon wkb hex string":
                                        pg: Polygon(srid: srid, rings:pg))
 
 #  MultiPoint
-let mp = @[Point(coord: Coord(x: 1.0, y: 1.0)), 
-           Point(coord: Coord(x: 2.0, y: 2.0))]
-const wkbnmp = "01"&
-               "04000000"&
-               "02000000"&# number of point
-               "01"&
-               "01000000"&
-               "000000000000F03F"&
-               "000000000000F03F"&
-               "01"&
-               "01000000"&
-               "0000000000000040"&
-               "0000000000000040"
-
-const wkbnsmp = "01"&
-                "04000020"&
-                "E6100000"&#  srid = 4326
+let mpt = @[Point(coord: Coord(x: 1.0, y: 1.0)), 
+            Point(coord: Coord(x: 2.0, y: 2.0))]
+const wkbnmpt = "01"&
+                "04000000"&
                 "02000000"&# number of point
                 "01"&
                 "01000000"&
@@ -241,21 +228,21 @@ const wkbnsmp = "01"&
                 "0000000000000040"&
                 "0000000000000040"
 
-const wkbxmp = "00"&
-               "00000004"&
-               "00000002"&# number of point
-               "00"&
-               "00000001"&
-               "3FF0000000000000"&
-               "3FF0000000000000"&
-               "00"&
-               "00000001"&
-               "4000000000000000"&
-               "4000000000000000"                
+const wkbnsmpt = "01"&
+                 "04000020"&
+                 "E6100000"&#  srid = 4326
+                 "02000000"&# number of point
+                 "01"&
+                 "01000000"&
+                 "000000000000F03F"&
+                 "000000000000F03F"&
+                 "01"&
+                 "01000000"&
+                 "0000000000000040"&
+                 "0000000000000040"
 
-const wkbxsmp = "00"&
-                "20000004"&
-                "000010E6"&
+const wkbxmpt = "00"&
+                "00000004"&
                 "00000002"&# number of point
                 "00"&
                 "00000001"&
@@ -264,21 +251,130 @@ const wkbxsmp = "00"&
                 "00"&
                 "00000001"&
                 "4000000000000000"&
-                "4000000000000000" 
+                "4000000000000000"                
+
+const wkbxsmpt = "00"&
+                 "20000004"&
+                 "000010E6"&#  srid = 4326
+                 "00000002"&# number of point
+                 "00"&
+                 "00000001"&
+                 "3FF0000000000000"&
+                 "3FF0000000000000"&
+                 "00"&
+                 "00000001"&
+                 "4000000000000000"&
+                 "4000000000000000" 
 
 suite "parse MultiPoint wkb hex string":
   test "little endian wkb":
-    check parseWkb(wkbnmp) == Geometry(kind: wkbMultiPoint,
-                                       mp: MultiPoint(points: mp))
+    check parseWkb(wkbnmpt) == Geometry(kind: wkbMultiPoint,
+                                        mpt: MultiPoint(points: mpt))
 
   test "little endian wkb with srid":
-    check parseWkb(wkbnsmp) == Geometry(kind: wkbMultiPoint,
-                                        mp: MultiPoint(srid: srid, points: mp))
+    check parseWkb(wkbnsmpt) == Geometry(kind: wkbMultiPoint,
+                                         mpt: MultiPoint(srid: srid, points: mpt))
 
   test "big endian wkb":
-    check parseWkb(wkbxmp) == Geometry(kind: wkbMultiPoint,
-                                       mp: MultiPoint(points: mp))
+    check parseWkb(wkbxmpt) == Geometry(kind: wkbMultiPoint,
+                                        mpt: MultiPoint(points: mpt))
 
   test "big endian wkb with srid":
-    check parseWkb(wkbxsmp) == Geometry(kind: wkbMultiPoint,
-                                       mp: MultiPoint(srid: srid, points: mp))
+    check parseWkb(wkbxsmpt) == Geometry(kind: wkbMultiPoint,
+                                         mpt: MultiPoint(srid: srid,
+                                           points: mpt))
+
+let mls = @[
+            LineString(coords: @[Coord(x: 1.0, y: 1.0), Coord(x: 2.0, y: 2.0)]),
+            LineString(coords: @[Coord(x: 3.0, y: 3.0), Coord(x: 4.0, y: 4.0)])
+          ]
+const wkbnmls = "01"&
+                "05000000"&
+                "02000000"&# number of LineString
+                "01"&
+                "02000000"&
+                "02000000"&
+                "000000000000F03F"&
+                "000000000000F03F"&
+                "0000000000000040"&
+                "0000000000000040"&
+                "01"&
+                "02000000"&
+                "02000000"&
+                "0000000000000840"&
+                "0000000000000840"&
+                "0000000000001040"&
+                "0000000000001040"
+const wkbnsmls = "01"&
+                 "05000020"&
+                 "E6100000"&#  srid = 4326
+                 "02000000"&# number of LineString
+                 "01"&
+                 "02000000"&
+                 "02000000"&
+                 "000000000000F03F"&
+                 "000000000000F03F"&
+                 "0000000000000040"&
+                 "0000000000000040"&
+                 "01"&
+                 "02000000"&
+                 "02000000"&
+                 "0000000000000840"&
+                 "0000000000000840"&
+                 "0000000000001040"&
+                 "0000000000001040"
+const wkbxmls = "00"&
+                "00000005"&
+                "00000002"&# number of LineString
+                "00"&
+                "00000002"&
+                "00000002"&
+                "3FF0000000000000"&
+                "3FF0000000000000"&
+                "4000000000000000"&
+                "4000000000000000"&
+                "00"&
+                "00000002"&
+                "00000002"&
+                "4008000000000000"&
+                "4008000000000000"&
+                "4010000000000000"&
+                "4010000000000000"
+const wkbxsmls = "00"&
+                 "20000005"&
+                 "000010E6"&#  srid = 4326
+                 "00000002"&# number of LineString
+                 "00"&
+                 "00000002"&
+                 "00000002"&
+                 "3FF0000000000000"&
+                 "3FF0000000000000"&
+                 "4000000000000000"&
+                 "4000000000000000"&
+                 "00"&
+                 "00000002"&
+                 "00000002"&
+                 "4008000000000000"&
+                 "4008000000000000"&
+                 "4010000000000000"&
+                 "4010000000000000"
+
+
+suite "parse MultiLineString wkb hex string":
+  test "little endian wkb":
+    check parseWkb(wkbnmls) == Geometry(kind: wkbMultiLineString,
+                                       mls: MultiLineString(lineStrings: mls))
+
+  test "little endian wkb with srid":
+    check parseWkb(wkbnsmls) == Geometry(kind: wkbMultiLineString,
+                                        mls: MultiLineString(srid: srid,
+                                          lineStrings: mls))
+
+  test "big endian wkb":
+    check parseWkb(wkbxmls) == Geometry(kind: wkbMultiLineString,
+                                        mls: MultiLineString(lineStrings: mls))
+
+  test "big endian wkb with srid":
+    check parseWkb(wkbxsmls) == Geometry(kind: wkbMultiLineString,
+                                          mls: MultiLineString(srid: srid,
+                                            lineStrings: mls))

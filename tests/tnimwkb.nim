@@ -554,3 +554,28 @@ suite "parse MultiPolygon wkb hex string":
     check parseWkb(wkbxsmpg) == Geometry(kind: wkbMultiPolygon,
                                          mpg: MultiPolygon(srid: srid,
                                            polygons: mpg))
+
+let gc = @[Geometry(kind: wkbPoint, pt: Point(coord: Coord(x: 1.0, y: 1.0))),
+           Geometry(kind: wkbLineString,
+                    ls: LineString(coords: @[Coord(x: 1.0, y: 1.0),
+                                             Coord(x: 2.0, y: 2.0)
+                                            ]))
+          ]
+const wkbgc = "01"&
+              "07000000"&#  GeometryCollection
+              "02000000"&#  number of geometry
+              "01"&
+              "01000000"&#  Point
+              "000000000000F03F"&
+              "000000000000F03F"&
+              "01"&
+              "02000000"&# LineString
+              "02000000"&
+              "000000000000F03F"&
+              "000000000000F03F"&
+              "0000000000000040"&
+              "0000000000000040"
+
+suite "parse GeometryCollection wkb hex string":
+  test "wkb with one Point and two LineString":
+    check parseWkb(wkbgc) == Geometry(kind: wkbGeometryCollection, gc: gc)

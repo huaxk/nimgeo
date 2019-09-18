@@ -1,4 +1,4 @@
-import logging, strutils
+import logging, endians, strutils
 from oids import hexbyte
 
 type
@@ -73,10 +73,12 @@ type
       gc*: GeometryCollection
 
   WkbWriter* = ref object
-    data: string
+    data: seq[byte]
     pos: int
     bytesOrder: WkbByteOrder
 
+proc `==`*(a: Endianness, b: WkbByteOrder): bool =
+  return a.int != b.int #  Endianness and WkbByteOrder 定义相反
 
 proc `==`*(a, b: Coord): bool =
   return (a.x == b.x) and (a.y == b.y)
@@ -276,30 +278,49 @@ proc parseWkb*(str: cstring): Geometry =
 
 ##  write to wkb
 
-# const hexchars = "0123456789ABCDEF"
-
-# proc bytehex*(byt: byte): string =
-#   let lower = byt and 0b00001111
-#   let height = (byt and 0b11110000) shr 4
-#   return hexchars[height] & hexchars[lower]
-
-proc toHex*(x: SomeInteger, len: Positive,
-            bytesOrder: WkbByteOrder = wkbNDR): string =
-  const
-    HexChars = "0123456789ABCDEF"
+proc toByte*(x: uint32, bytesOrder: WkbByteOrder): array[4, byte] =
   var
-    n = x
-    bytesLen = int(len / 2)
-  result = newString(len)  
-  for j in countup(0, bytesLen-1):
-    result[j*2] = HexChars[int((n and 0xF0) shr 4)]
-    result[j*2+1] = HexChars[int(n and 0xF)]
-    n = n shr 8
-    if n == 0 and x < 0: n = -1
+    x = x
+    y = x
+  if cpuEndian != bytesOrder:
+    if cpuEndian == littleEndian:
+      bigEndian32(addr y, addr x)
+    else:
+      littleEndian32(addr y, addr x)
+  return cast[array[4, byte]](y)
 
-proc toHex*(f: float64, len: Positive): string =
-  let i = cast[int64](f)
-  return i.toHex()
+proc bytehex*(byt: byte): string =
+  const HexChars = "0123456789ABCDEF"
+  let lower = byt and 0b00001111
+  let height = (byt and 0b11110000) shr 4
+  return HexChars[height] & HexChars[lower]
+
+proc toHex*(bytes: seq[byte]): string =
+  result = newString(2*bytes.len)
+  var i = 0
+  for b in bytes:
+    let hex = bytehex(b)
+    result[i] = hex[0]
+    result[i+1] = hex[1]
+    inc(i)
+
+# proc toHex*(x: SomeInteger, len: Positive,
+#             bytesOrder: WkbByteOrder = wkbNDR): string =
+#   const
+#     HexChars = "0123456789ABCDEF"
+#   var
+#     n = x
+#     bytesLen = int(len / 2)
+#   result = newString(len)  
+#   for j in countup(0, bytesLen-1):
+#     result[j*2] = HexChars[int((n and 0xF0) shr 4)]
+#     result[j*2+1] = HexChars[int(n and 0xF)]
+#     n = n shr 8
+#     if n == 0 and x < 0: n = -1
+
+# proc toHex*(f: float64, len: Positive): string =
+#   let i = cast[int64](f)
+#   return i.toHex()
 
 proc newWkbWriter*(bytesOrder: WkbByteOrder): WkbWriter =
   new(result)
@@ -307,9 +328,9 @@ proc newWkbWriter*(bytesOrder: WkbByteOrder): WkbWriter =
 
 proc write(w: WkbWriter, pt: Point, bytesOrder: WkbByteOrder,
            typ: WkbGeometryType) =
-  w.data &= bytesOrder.int.toHex(2)
-  w.data &= typ.int.toHex(8)
-  w.data &= pt.coord.x.toHex(16)
+  w.data.add(bytesOrder.byte)
+  w.data.add(typ.uint32.toByte(bytesOrder))
+  # w.data &= pt.coord.x.toHex(16)
 
 proc write(w: WkbWriter, geo: Geometry, bytesOrder: WkbByteOrder) =
   let kind = geo.kind
@@ -327,4 +348,4 @@ proc write(w: WkbWriter, geo: Geometry, bytesOrder: WkbByteOrder) =
 proc writeWkb*(geo: Geometry, bytesOrder: WkbByteOrder = wkbNDR): string =
   var wkbWriter = newWkbWriter(bytesOrder)
   # wkbWriter.write(geo)
-  return wkbWriter.data
+  return wkbWriter.data.toHex()

@@ -1,4 +1,4 @@
-import logging
+import logging, strutils
 from oids import hexbyte
 
 type
@@ -72,6 +72,12 @@ type
     of wkbGeometryCollection:
       gc*: GeometryCollection
 
+  WkbWriter* = ref object
+    data: string
+    pos: int
+    bytesOrder: WkbByteOrder
+
+
 proc `==`*(a, b: Coord): bool =
   return (a.x == b.x) and (a.y == b.y)
 
@@ -113,11 +119,14 @@ proc swapEndian64(p: pointer) =
   var o = cast[cstring](p)
   (o[0], o[1], o[2], o[3], o[4], o[5], o[6], o[7]) = (o[7], o[6], o[5], o[4], o[3], o[2], o[1], o[0])
 
+
+##  parse wkb
+
 proc parseEndian(str: cstring, pos: var int): WkbByteOrder =
   let c = (hexbyte(str[2 * pos]) shl 4) or hexbyte(str[2 * pos + 1])
   result = WkbByteOrder(c)
   inc(pos)
-  log(lvlDebug, "end position: ", $(pos * 2), " -> ", $result)
+  debug("end position: ", $(pos * 2), " -> ", $result)
 
 proc parseGeometryType(str: cstring, pos: var int, bswap: bool):
                       (WkbGeometryType, bool) =
@@ -134,7 +143,7 @@ proc parseGeometryType(str: cstring, pos: var int, bswap: bool):
   else:
     result[1] = false
   
-  log(lvlDebug, "end position: ", $(pos * 2), " -> ", $result)
+  debug("end position: ", $(pos * 2), " -> ", $result)
 
 proc parseuint32(str: cstring, pos: var int, bswap: bool): uint32 =
   var bytes = cast[cstring](addr result)
@@ -145,7 +154,7 @@ proc parseuint32(str: cstring, pos: var int, bswap: bool): uint32 =
   if bswap:
     swapEndian32(bytes)
   
-  log(lvlDebug, "end position: ", $(pos * 2), " -> ", $result)
+  debug("end position: ", $(pos * 2), " -> ", $result)
 
 proc parseCoord(str: cstring, pos: var int, bswap: bool): Coord =
   new(result)
@@ -158,7 +167,7 @@ proc parseCoord(str: cstring, pos: var int, bswap: bool): Coord =
     swapEndian64(addr result.x)
     swapEndian64(addr result.y)
 
-  log(lvlDebug, "end position: ", $(pos * 2), " -> ",
+  debug("end position: ", $(pos * 2), " -> ",
       "(", result.x, ",", result.y, ")") 
 
 proc parseCoords(str: cstring, pos: var int, bswap: bool): seq[Coord] =
@@ -260,6 +269,62 @@ proc parseGeometry*(str: cstring, pos: var int, bswap = false): Geometry =
     return Geometry(kind: wkbType, gc: gc)
 
 proc parseWkb*(str: cstring): Geometry =
-  log(lvlDebug, "WKB: ", str)
+  debug("WKB: ", str)
   var pos = 0 #  解析的起点
   return parseGeometry(str, pos)
+
+
+##  write to wkb
+
+# const hexchars = "0123456789ABCDEF"
+
+# proc bytehex*(byt: byte): string =
+#   let lower = byt and 0b00001111
+#   let height = (byt and 0b11110000) shr 4
+#   return hexchars[height] & hexchars[lower]
+
+proc toHex*(x: SomeInteger, len: Positive,
+            bytesOrder: WkbByteOrder = wkbNDR): string =
+  const
+    HexChars = "0123456789ABCDEF"
+  var
+    n = x
+    bytesLen = int(len / 2)
+  result = newString(len)  
+  for j in countup(0, bytesLen-1):
+    result[j*2] = HexChars[int((n and 0xF0) shr 4)]
+    result[j*2+1] = HexChars[int(n and 0xF)]
+    n = n shr 8
+    if n == 0 and x < 0: n = -1
+
+proc toHex*(f: float64, len: Positive): string =
+  let i = cast[int64](f)
+  return i.toHex()
+
+proc newWkbWriter*(bytesOrder: WkbByteOrder): WkbWriter =
+  new(result)
+  result.bytesOrder = bytesOrder
+
+proc write(w: WkbWriter, pt: Point, bytesOrder: WkbByteOrder,
+           typ: WkbGeometryType) =
+  w.data &= bytesOrder.int.toHex(2)
+  w.data &= typ.int.toHex(8)
+  w.data &= pt.coord.x.toHex(16)
+
+proc write(w: WkbWriter, geo: Geometry, bytesOrder: WkbByteOrder) =
+  let kind = geo.kind
+  case kind:
+  of wkbPoint:
+    w.write(geo.pt, bytesOrder, kind)
+  else: discard
+  
+  
+
+# proc toHex(w: WkbWriter): string =
+#   for b in w.data:
+#     result &= bytehex(b)
+
+proc writeWkb*(geo: Geometry, bytesOrder: WkbByteOrder = wkbNDR): string =
+  var wkbWriter = newWkbWriter(bytesOrder)
+  # wkbWriter.write(geo)
+  return wkbWriter.data

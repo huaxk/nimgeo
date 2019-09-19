@@ -479,7 +479,7 @@ let geometries = @[Geometry(kind: wkbPoint,
                                                     ]))
           ]
 let gcGeometry = Geometry(kind: wkbGeometryCollection, gc: geometries)
-const wkbgc = "01"&
+const wkbngc = "01"&
               "07000000"&#  GeometryCollection
               "02000000"&#  number of geometry
               "01"&
@@ -493,3 +493,17 @@ const wkbgc = "01"&
               "000000000000F03F"&
               "0000000000000040"&
               "0000000000000040"
+const wkbxgc = "00"&
+              "00000007"&#  GeometryCollection
+              "00000002"&#  number of geometry
+              "00"&
+              "00000001"&#  Point
+              "3FF0000000000000"&
+              "3FF0000000000000"&
+              "00"&
+              "00000002"&# LineString
+              "00000002"&
+              "3FF0000000000000"&
+              "3FF0000000000000"&
+              "4000000000000000"&
+              "4000000000000000"

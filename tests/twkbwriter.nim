@@ -81,4 +81,5 @@ suite "Geometry to wkb hex using WkbWriter":
     check smpgGeometry.toWkb(wkbXDR) == wkbxsmpg
 
   test "convert GeometryCollection to wkb":
-    check gcGeometry.toWkb(wkbNDR) == wkbgc
+    check gcGeometry.toWkb(wkbNDR) == wkbngc
+    check gcGeometry.toWkb(wkbXDR) == wkbxgc

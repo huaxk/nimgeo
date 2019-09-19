@@ -43,4 +43,5 @@ suite "wkb hex to Geometry":
     check parseWkb(wkbxsmpg) == smpgGeometry
 
   test "parse GeometryCollection to wkb":
-    check parseWkb(wkbgc) == gcGeometry
+    check parseWkb(wkbngc) == gcGeometry
+    check parseWkb(wkbxgc) == gcGeometry

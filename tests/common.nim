@@ -1,5 +1,7 @@
 import geometry
 
+# addHandler(newConsoleLogger(levelThreshold = lvlDebug))
+
 const srid = 4326'u32
 
 #  Point
@@ -29,7 +31,11 @@ const wkbxspt = "00"&# big endian
 
 
 #  LineString     
-let ls = @[Coord(x: 1.0, y: 1.0), Coord(x: 2.0, y: 2.0)]
+let coords = @[Coord(x: 1.0, y: 1.0), Coord(x: 2.0, y: 2.0)]
+let ls = LineString(coords: coords)
+let sls = LineString(srid: srid, coords: coords)
+let lsGeometry = Geometry(kind: wkbLineString, ls: ls)
+let slsGeometry = Geometry(kind: wkbLineString, ls: sls)
 const wkbnls = "01"&
                "02000000"&
                "02000000"&
@@ -62,11 +68,19 @@ const wkbxsls = "00"&
                 "4000000000000000"&
                 "4000000000000000"
 
-#  Polygon      
-let pg = @[
-           @[Coord(x: 1.0, y: 1.0), Coord(x: 2.0, y: 2.0), Coord(x: 3.0, y: 3.0), Coord(x: 1.0, y: 1.0)],
-           @[Coord(x:4.0, y: 4.0), Coord(x: 5.0, y: 5.0), Coord(x: 6.0, y: 6.0), Coord(x: 4.0, y: 4.0)]
-          ]    
+#  Polygon
+let rings = @[
+              @[Coord(x: 1.0, y: 1.0), Coord(x: 2.0, y: 2.0),
+                Coord(x: 3.0, y: 3.0), Coord(x: 1.0, y: 1.0)
+              ],
+              @[Coord(x:4.0, y: 4.0), Coord(x: 5.0, y: 5.0),
+                Coord(x: 6.0, y: 6.0), Coord(x: 4.0, y: 4.0)
+              ]
+            ]
+let pg = Polygon(rings: rings)
+let spg = Polygon(srid: srid, rings: rings)
+let pgGeometry = Geometry(kind: wkbPolygon, pg: pg)
+let spgGeometry = Geometry(kind: wkbPolygon, pg: spg)
 const wkbnpg = "01"&
                "03000000"&
                "02000000"&# number of rings
@@ -156,8 +170,12 @@ const wkbxspg = "00"&
                 "4010000000000000" 
 
 #  MultiPoint
-let mpt = @[Point(coord: Coord(x: 1.0, y: 1.0)), 
-            Point(coord: Coord(x: 2.0, y: 2.0))]
+let points = @[Point(coord: Coord(x: 1.0, y: 1.0)), 
+               Point(coord: Coord(x: 2.0, y: 2.0))]
+let mpt = MultiPoint(points: points)
+let smpt = MultiPoint(srid: srid, points: points)
+let mptGeometry = Geometry(kind: wkbMultiPoint, mpt: mpt)
+let smptGeometry = Geometry(kind: wkbMultiPoint, mpt: smpt)
 const wkbnmpt = "01"&
                 "04000000"&
                 "02000000"&# number of point
@@ -209,10 +227,14 @@ const wkbxsmpt = "00"&
                  "4000000000000000" 
 
 #  MultiLineString
-let mls = @[
+let lss = @[
             LineString(coords: @[Coord(x: 1.0, y: 1.0), Coord(x: 2.0, y: 2.0)]),
             LineString(coords: @[Coord(x: 3.0, y: 3.0), Coord(x: 4.0, y: 4.0)])
           ]
+let mls = MultiLineString(linestrings: lss)
+let smls = MultiLineString(srid: srid, linestrings: lss)
+let mlsGeometry = Geometry(kind: wkbMultiLineString, mls: mls)
+let smlsGeometry = Geometry(kind: wkbMultiLineString, mls: smls)
 const wkbnmls = "01"&
                 "05000000"&
                 "02000000"&# number of LineString
@@ -285,7 +307,7 @@ const wkbxsmls = "00"&
                   "4010000000000000"
 
 #  MultiPolygon
-let mpg = @[
+let polygons = @[
             Polygon(rings: @[
               @[Coord(x: 1.0, y: 1.0), Coord(x: 2.0, y: 2.0),
                 Coord(x: 3.0, y: 3.0), Coord(x: 1.0, y: 1.0)]
@@ -297,6 +319,10 @@ let mpg = @[
                 Coord(x: 8.0, y: 8.0), Coord(x: 6.0, y: 6.0)]
             ])
           ]
+let mpg = MultiPolygon(polygons: polygons)
+let smpg = MultiPolygon(srid: srid, polygons: polygons)
+let mpgGeometry = Geometry(kind: wkbMultiPolygon, mpg: mpg)
+let smpgGeometry = Geometry(kind: wkbMultiPolygon, mpg: smpg)
 const wkbnmpg = "01"&
                 "06000000"&
                 "02000000"&# number of Ploygon
@@ -445,12 +471,14 @@ const wkbxsmpg =  "00"&
                   "4018000000000000"
 
 #  GeometryCollection
-let gc = @[Geometry(kind: wkbPoint, pt: Point(coord: Coord(x: 1.0, y: 1.0))),
-           Geometry(kind: wkbLineString,
-                    ls: LineString(coords: @[Coord(x: 1.0, y: 1.0),
-                                             Coord(x: 2.0, y: 2.0)
-                                            ]))
+let geometries = @[Geometry(kind: wkbPoint,
+                            pt: Point(coord: Coord(x: 1.0, y: 1.0))),
+                   Geometry(kind: wkbLineString,
+                            ls: LineString(coords: @[Coord(x: 1.0, y: 1.0),
+                                                     Coord(x: 2.0, y: 2.0)
+                                                    ]))
           ]
+let gcGeometry = Geometry(kind: wkbGeometryCollection, gc: geometries)
 const wkbgc = "01"&
               "07000000"&#  GeometryCollection
               "02000000"&#  number of geometry

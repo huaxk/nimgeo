@@ -33,6 +33,10 @@ proc toByte*(x: float64, byteOrder: WkbByteOrder): array[8, byte] =
       littleEndian64(addr y, addr x)
   return cast[array[8, byte]](y)
 
+proc toByte*(coord: Coord, byteOrder: WkbByteOrder): seq[byte] =
+  result &= coord.x.toByte(byteOrder)
+  result &= coord.y.toByte(byteOrder)
+
 proc toByte(typ: WkbGeometryType, byteOrder: WkbByteOrder, hasSrid: bool):
             array[4, byte] =
   result = typ.uint32.toByte(byteorder)
@@ -61,21 +65,56 @@ proc newWkbWriter*(bytesOrder: WkbByteOrder): WkbWriter =
   new(result)
   result.bytesOrder = bytesOrder
 
-proc write*(w: WkbWriter, pt: Point, bytesOrder: WkbByteOrder,
-           typ: WkbGeometryType) =
-  w.data.add(bytesOrder.byte)
-  let hasSrid = pt.srid != 0
-  w.data.add(typ.toByte(bytesOrder, hasSrid))
+proc write(w: WkbWriter, pt: Point, bytesOrder: WkbByteOrder) =
+  let
+    typ = wkbPoint
+    hasSrid = pt.srid != 0
+  w.data &= bytesOrder.byte
+  w.data &= typ.toByte(bytesOrder, hasSrid)
   if hasSrid:
-    w.data.add(pt.srid.toByte(bytesOrder))
-  w.data &= pt.coord.x.toByte(bytesOrder)
-  w.data &= pt.coord.y.toByte(bytesOrder)
+    w.data &= pt.srid.toByte(bytesOrder)
+  w.data &= pt.coord.toByte(bytesOrder)
 
-proc write*(w: WkbWriter, geo: Geometry, byteOrder: WkbByteOrder) =
+proc write(w: WkbWriter, ls: LineString, bytesOrder: WkbByteOrder) =
+  let
+    typ = wkbLineString
+    hasSrid = ls.srid != 0
+    length = ls.coords.len
+  w.data &= bytesOrder.byte
+  w.data &= typ.toByte(bytesOrder, hasSrid)
+  if hasSrid:
+    w.data &= ls.srid.toByte(bytesOrder)
+  w.data &= length.uint32.toByte(bytesOrder)
+  for i in countup(0, length-1):
+    w.data &= ls.coords[i].toByte(bytesOrder)
+
+proc write(w: WkbWriter, pg: Polygon, bytesOrder: WkbByteOrder) =
+  let
+    typ = wkbPolygon
+    hasSrid = pg.srid != 0
+    ringnum = pg.rings.len
+  w.data &= bytesOrder.byte
+  w.data &= typ.toByte(bytesOrder, hasSrid)
+  if hasSrid:
+    w.data &= pg.srid.toByte(bytesOrder)
+  w.data &= ringnum.uint32.toByte(bytesOrder)
+  for i in countup(0, ringnum-1):
+    let
+      coords = pg.rings[i]
+      coordsnum = coords.len
+    w.data &= coordsnum.uint32.toByte(bytesOrder)
+    for j in countup(0, coordsnum-1):
+      w.data &= coords[j].toByte(bytesOrder)
+
+proc write(w: WkbWriter, geo: Geometry, byteOrder: WkbByteOrder) =
   let kind = geo.kind
   case kind:
   of wkbPoint:
-    w.write(geo.pt, byteOrder, kind)
+    w.write(geo.pt, byteOrder)
+  of wkbLineString:
+    w.write(geo.ls, byteOrder)
+  of wkbPolygon:
+    w.write(geo.pg, byteOrder)
   else: discard
 
 proc toWkb*(geo: Geometry, byteOrder: WkbByteOrder = wkbNDR): string =

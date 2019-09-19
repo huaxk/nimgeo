@@ -7,7 +7,11 @@ import nimwkb
 const srid = 4326'u32
 
 #  Point
-let pt = Coord(x: 1.0, y: 2.0)
+let ptCoord = Coord(x: 1.0, y: 2.0)
+let pt = Point(coord: ptCoord)
+let spt = Point(srid: srid, coord: ptCoord)
+let ptGeometry = Geometry(kind: wkbPoint, pt: pt)
+let sptGeometry = Geometry(kind: wkbPoint, pt: spt)
 const wkbnpt = "01"&# little endian
                "01000000"&
                "000000000000F03F"&
@@ -29,20 +33,16 @@ const wkbxspt = "00"&# big endian
 
 suite "parse Point wkb hex string":
   test "little endian wkb":
-    check parseWkb(wkbnpt) == Geometry(kind: wkbPoint,
-                                        pt: Point(coord: pt))
+    check parseWkb(wkbnpt) == ptGeometry
 
   test "little endian wkb with srid":
-    check parseWkb(wkbnspt) == Geometry(kind: wkbPoint,
-                                        pt: Point(srid: srid, coord: pt))
+    check parseWkb(wkbnspt) == sptGeometry
   
   test "big endian wkb":
-    check parseWkb(wkbxpt) == Geometry(kind: wkbPoint,
-                                        pt: Point(coord: pt))
+    check parseWkb(wkbxpt) == ptGeometry
 
   test "big endian wkb with srid":
-    check parseWkb(wkbxspt) == Geometry(kind: wkbPoint,
-                                        pt: Point(srid: srid, coord: pt))
+    check parseWkb(wkbxspt) == sptGeometry
 
 #  LineString     
 let ls = @[Coord(x: 1.0, y: 1.0), Coord(x: 2.0, y: 2.0)]
@@ -572,3 +572,8 @@ const wkbgc = "01"&
 suite "parse GeometryCollection wkb hex string":
   test "wkb with one Point and two LineString":
     check parseWkb(wkbgc) == Geometry(kind: wkbGeometryCollection, gc: gc)
+
+
+suite "convert Geometry Point to wkb":
+  test "Point to wkb bytes":
+    check writeWkb(ptGeometry, wkbNDR) == wkbnpt

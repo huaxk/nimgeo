@@ -278,16 +278,28 @@ proc parseWkb*(str: cstring): Geometry =
 
 ##  write to wkb
 
-proc toByte*(x: uint32, bytesOrder: WkbByteOrder): array[4, byte] =
+proc toByte*(x: uint32, byteOrder: WkbByteOrder): array[4, byte] =
   var
     x = x
     y = x
-  if cpuEndian != bytesOrder:
+  if cpuEndian != byteOrder:
     if cpuEndian == littleEndian:
       bigEndian32(addr y, addr x)
     else:
       littleEndian32(addr y, addr x)
   return cast[array[4, byte]](y)
+
+proc toByte*(x: float64, byteOrder: WkbByteOrder): array[8, byte] =
+  var
+    x = x
+    y = x
+  #  TODO: 代码与前面重复，因为pointer不能赋值，重构成有问题
+  if cpuEndian != byteOrder:        
+    if cpuEndian == littleEndian:
+      bigEndian64(addr y, addr x)
+    else:
+      littleEndian64(addr y, addr x)
+  return cast[array[8, byte]](y)
 
 proc bytehex*(byt: byte): string =
   const HexChars = "0123456789ABCDEF"
@@ -302,50 +314,27 @@ proc toHex*(bytes: seq[byte]): string =
     let hex = bytehex(b)
     result[i] = hex[0]
     result[i+1] = hex[1]
-    inc(i)
-
-# proc toHex*(x: SomeInteger, len: Positive,
-#             bytesOrder: WkbByteOrder = wkbNDR): string =
-#   const
-#     HexChars = "0123456789ABCDEF"
-#   var
-#     n = x
-#     bytesLen = int(len / 2)
-#   result = newString(len)  
-#   for j in countup(0, bytesLen-1):
-#     result[j*2] = HexChars[int((n and 0xF0) shr 4)]
-#     result[j*2+1] = HexChars[int(n and 0xF)]
-#     n = n shr 8
-#     if n == 0 and x < 0: n = -1
-
-# proc toHex*(f: float64, len: Positive): string =
-#   let i = cast[int64](f)
-#   return i.toHex()
+    i += 2
 
 proc newWkbWriter*(bytesOrder: WkbByteOrder): WkbWriter =
   new(result)
   result.bytesOrder = bytesOrder
 
-proc write(w: WkbWriter, pt: Point, bytesOrder: WkbByteOrder,
+proc write*(w: WkbWriter, pt: Point, bytesOrder: WkbByteOrder,
            typ: WkbGeometryType) =
   w.data.add(bytesOrder.byte)
   w.data.add(typ.uint32.toByte(bytesOrder))
-  # w.data &= pt.coord.x.toHex(16)
+  w.data &= pt.coord.x.toByte(bytesOrder)
+  w.data &= pt.coord.y.toByte(bytesOrder)
 
-proc write(w: WkbWriter, geo: Geometry, bytesOrder: WkbByteOrder) =
+proc write*(w: WkbWriter, geo: Geometry, byteOrder: WkbByteOrder) =
   let kind = geo.kind
   case kind:
   of wkbPoint:
-    w.write(geo.pt, bytesOrder, kind)
+    w.write(geo.pt, byteOrder, kind)
   else: discard
-  
-  
 
-# proc toHex(w: WkbWriter): string =
-#   for b in w.data:
-#     result &= bytehex(b)
-
-proc writeWkb*(geo: Geometry, bytesOrder: WkbByteOrder = wkbNDR): string =
-  var wkbWriter = newWkbWriter(bytesOrder)
-  # wkbWriter.write(geo)
+proc writeWkb*(geo: Geometry, byteOrder: WkbByteOrder = wkbNDR): string =
+  var wkbWriter = newWkbWriter(byteOrder)
+  wkbWriter.write(geo, byteOrder)
   return wkbWriter.data.toHex()

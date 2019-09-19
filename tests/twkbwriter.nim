@@ -73,3 +73,9 @@ suite "Geometry to wkb hex using WkbWriter":
     check mlsGeometry.toWkb(wkbXDR) == wkbxmls
     check smlsGeometry.toWkb(wkbNDR) == wkbnsmls
     check smlsGeometry.toWkb(wkbXDR) == wkbxsmls
+  
+  test "convert Geometry MultiPolygon to wkb":
+    check mpgGeometry.toWkb(wkbNDR) == wkbnmpg
+    check mpgGeometry.toWkb(wkbXDR) == wkbxmpg
+    check smpgGeometry.toWkb(wkbNDR) == wkbnsmpg
+    check smpgGeometry.toWkb(wkbXDR) == wkbxsmpg

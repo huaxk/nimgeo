@@ -142,6 +142,21 @@ proc write(w: WkbWriter, mls: MultiLineString, byteOrder: WkbByteOrder) =
   for i in countup(0, linestringnum-1):
     w.write(mls.linestrings[i], byteOrder)
 
+proc write(w: WkbWriter, mpg: MultiPolygon, byteOrder: WkbByteOrder) =
+  let
+    typ = wkbMultiPolygon
+    hasSrid = mpg.srid != 0
+    polygonnum = mpg.polygons.len
+
+  w.data &= byteOrder.byte
+  w.data &= typ.toByte(byteOrder, hasSrid)
+  if hasSrid:
+    w.data &= mpg.srid.toByte(byteOrder)
+
+  w.data &= polygonnum.uint32.toByte(byteOrder)
+  for i in countup(0, polygonnum-1):
+    w.write(mpg.polygons[i], byteOrder)
+
 proc write(w: WkbWriter, geo: Geometry, byteOrder: WkbByteOrder) =
   let kind = geo.kind
   case kind:
@@ -155,6 +170,8 @@ proc write(w: WkbWriter, geo: Geometry, byteOrder: WkbByteOrder) =
     w.write(geo.mpt, byteOrder)
   of wkbMultiLineString:
     w.write(geo.mls, byteOrder)
+  of wkbMultiPolygon:
+    w.write(geo.mpg, byteOrder)
   else: discard
 
 proc toWkb*(geo: Geometry, byteOrder: WkbByteOrder = wkbNDR): string =

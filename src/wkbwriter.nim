@@ -33,6 +33,15 @@ proc toByte*(x: float64, byteOrder: WkbByteOrder): array[8, byte] =
       littleEndian64(addr y, addr x)
   return cast[array[8, byte]](y)
 
+proc toByte(typ: WkbGeometryType, byteOrder: WkbByteOrder, hasSrid: bool):
+            array[4, byte] =
+  result = typ.uint32.toByte(byteorder)
+  if hasSrid:
+    if byteOrder == wkbNDR:
+      result[3] = 0x20
+    else:
+      result[0] = 0x20
+    
 proc bytehex*(byt: byte): string =
   const HexChars = "0123456789ABCDEF"
   let lower = byt and 0b00001111
@@ -55,7 +64,10 @@ proc newWkbWriter*(bytesOrder: WkbByteOrder): WkbWriter =
 proc write*(w: WkbWriter, pt: Point, bytesOrder: WkbByteOrder,
            typ: WkbGeometryType) =
   w.data.add(bytesOrder.byte)
-  w.data.add(typ.uint32.toByte(bytesOrder))
+  let hasSrid = pt.srid != 0
+  w.data.add(typ.toByte(bytesOrder, hasSrid))
+  if hasSrid:
+    w.data.add(pt.srid.toByte(bytesOrder))
   w.data &= pt.coord.x.toByte(bytesOrder)
   w.data &= pt.coord.y.toByte(bytesOrder)
 

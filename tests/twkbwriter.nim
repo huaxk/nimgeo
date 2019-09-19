@@ -36,3 +36,5 @@ suite "Geometry to wkb using WkbWriter":
   test "convert Geometry Point to wkb":
     check ptGeometry.toWkb(wkbNDR) == wkbnpt
     check ptGeometry.toWkb(wkbXDR) == wkbxpt
+    check sptGeometry.toWkb(wkbNDR) == wkbnspt
+    check sptGeometry.toWkb(wkbXDR) == wkbxspt

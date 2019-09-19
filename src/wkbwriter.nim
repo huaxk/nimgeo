@@ -101,9 +101,9 @@ proc write(w: WkbWriter, pg: Polygon, bytesOrder: WkbByteOrder) =
   for i in countup(0, ringnum-1):
     let
       coords = pg.rings[i]
-      coordsnum = coords.len
-    w.data &= coordsnum.uint32.toByte(bytesOrder)
-    for j in countup(0, coordsnum-1):
+      coordnum = coords.len
+    w.data &= coordnum.uint32.toByte(bytesOrder)
+    for j in countup(0, coordnum-1):
       w.data &= coords[j].toByte(bytesOrder)
 
 proc write(w: WkbWriter, geo: Geometry, byteOrder: WkbByteOrder) =

@@ -67,3 +67,9 @@ suite "Geometry to wkb hex using WkbWriter":
     check mptGeometry.toWkb(wkbXDR) == wkbxmpt
     check smptGeometry.toWkb(wkbNDR) == wkbnsmpt
     check smptGeometry.toWkb(wkbXDR) == wkbxsmpt
+
+  test "convert Geometry MultiLineString to wkb":
+    check mlsGeometry.toWkb(wkbNDR) == wkbnmls
+    check mlsGeometry.toWkb(wkbXDR) == wkbxmls
+    check smlsGeometry.toWkb(wkbNDR) == wkbnsmls
+    check smlsGeometry.toWkb(wkbXDR) == wkbxsmls

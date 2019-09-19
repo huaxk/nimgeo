@@ -126,7 +126,22 @@ proc write(w: WkbWriter, mpt: MultiPoint, byteOrder: WkbByteOrder) =
   w.data &= pointnum.uint32.toByte(byteOrder)
   for i in countup(0, pointnum-1):
     w.write(mpt.points[i], byteOrder)
-  
+
+proc write(w: WkbWriter, mls: MultiLineString, byteOrder: WkbByteOrder) =
+  let
+    typ = wkbMultiLineString
+    hasSrid = mls.srid != 0
+    linestringnum = mls.linestrings.len 
+
+  w.data &= byteOrder.byte
+  w.data &= typ.toByte(byteOrder, hasSrid)
+  if hasSrid:
+    w.data &= mls.srid.toByte(byteOrder)
+
+  w.data &= linestringnum.uint32.toByte(byteOrder)
+  for i in countup(0, linestringnum-1):
+    w.write(mls.linestrings[i], byteOrder)
+
 proc write(w: WkbWriter, geo: Geometry, byteOrder: WkbByteOrder) =
   let kind = geo.kind
   case kind:
@@ -138,6 +153,8 @@ proc write(w: WkbWriter, geo: Geometry, byteOrder: WkbByteOrder) =
     w.write(geo.pg, byteOrder)
   of wkbMultiPoint:
     w.write(geo.mpt, byteOrder)
+  of wkbMultiLineString:
+    w.write(geo.mls, byteOrder)
   else: discard
 
 proc toWkb*(geo: Geometry, byteOrder: WkbByteOrder = wkbNDR): string =

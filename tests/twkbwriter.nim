@@ -61,3 +61,9 @@ suite "Geometry to wkb hex using WkbWriter":
     check pgGeometry.toWkb(wkbXDR) == wkbxpg
     check spgGeometry.toWkb(wkbNDR) == wkbnspg
     check spgGeometry.toWkb(wkbXDR) == wkbxspg
+
+  test "convert Geometry MultiPoint to wkb":
+    check mptGeometry.toWkb(wkbNDR) == wkbnmpt
+    check mptGeometry.toWkb(wkbXDR) == wkbxmpt
+    check smptGeometry.toWkb(wkbNDR) == wkbnsmpt
+    check smptGeometry.toWkb(wkbXDR) == wkbxsmpt

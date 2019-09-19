@@ -1,12 +1,9 @@
-import unittest, endians
+import unittest
+import geometry, wkbwriter
 
-import nimwkb
+include common
 
-suite "common tests":
-  test "Endianness and WkbByteOrder comparison operation":
-    check littleEndian == wkbNDR
-    check bigEndian == wkbXDR
-
+suite "utility procedure":
   test "toByte: convert uint32 to byte":
     let x = 4326'u32
     check x.toByte(wkbNDR) == [0xE6'u8, 0x10, 0x00, 0x00]
@@ -33,3 +30,8 @@ suite "common tests":
               "000000000000F03F"&
               "0000000000000040"
     check x.toHex == s
+
+
+suite "convert Geometry Point to wkb":
+  test "Point to wkb bytes":
+    check writeWkb(ptGeometry, wkbNDR) == wkbnpt

@@ -66,7 +66,7 @@ proc write*(w: WkbWriter, geo: Geometry, byteOrder: WkbByteOrder) =
     w.write(geo.pt, byteOrder, kind)
   else: discard
 
-proc writeWkb*(geo: Geometry, byteOrder: WkbByteOrder = wkbNDR): string =
+proc toWkb*(geo: Geometry, byteOrder: WkbByteOrder = wkbNDR): string =
   var wkbWriter = newWkbWriter(byteOrder)
   wkbWriter.write(geo, byteOrder)
   return wkbWriter.data.toHex()

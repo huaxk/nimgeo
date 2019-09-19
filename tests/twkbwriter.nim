@@ -32,6 +32,7 @@ suite "utility procedure":
     check x.toHex == s
 
 
-suite "convert Geometry Point to wkb":
-  test "Point to wkb bytes":
-    check writeWkb(ptGeometry, wkbNDR) == wkbnpt
+suite "Geometry to wkb using WkbWriter":
+  test "convert Geometry Point to wkb":
+    check ptGeometry.toWkb(wkbNDR) == wkbnpt
+    check ptGeometry.toWkb(wkbXDR) == wkbxpt

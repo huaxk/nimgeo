@@ -79,3 +79,6 @@ suite "Geometry to wkb hex using WkbWriter":
     check mpgGeometry.toWkb(wkbXDR) == wkbxmpg
     check smpgGeometry.toWkb(wkbNDR) == wkbnsmpg
     check smpgGeometry.toWkb(wkbXDR) == wkbxsmpg
+
+  test "convert GeometryCollection to wkb":
+    check gcGeometry.toWkb(wkbNDR) == wkbgc

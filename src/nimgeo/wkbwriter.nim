@@ -189,7 +189,42 @@ proc write(w: WkbWriter, geo: Geometry, byteOrder: WkbByteOrder) =
   of wkbGeometryCollection:
     w.write(geo.gc, byteOrder)
 
+proc toWkb*(pt: Point, byteOrder: WkbByteOrder = wkbNDR): string =
+  var wkbWriter = newWkbWriter(byteOrder)
+  wkbWriter.write(pt, byteOrder)
+  return wkbWriter.data.toHex
+
+proc toWkb*(ls: LineString, byteOrder: WkbByteOrder = wkbNDR): string =
+  var wkbWriter = newWkbWriter(byteOrder)
+  wkbWriter.write(ls, byteOrder)
+  return wkbWriter.data.toHex
+
+proc toWkb*(pg: Polygon, byteOrder: WkbByteOrder = wkbNDR): string =
+  var wkbWriter = newWkbWriter(byteOrder)
+  wkbWriter.write(pg, byteOrder)
+  return wkbWriter.data.toHex
+
+proc toWkb*(mpt: MultiPoint, byteOrder: WkbByteOrder = wkbNDR): string =
+  var wkbWriter = newWkbWriter(byteOrder)
+  wkbWriter.write(mpt, byteOrder)
+  return wkbWriter.data.toHex
+
+proc toWkb*(mls: MultiLineString, byteOrder: WkbByteOrder = wkbNDR): string =
+  var wkbWriter = newWkbWriter(byteOrder)
+  wkbWriter.write(mls, byteOrder)
+  return wkbWriter.data.toHex
+
+proc toWkb*(mpg: MultiPolygon, byteOrder: WkbByteOrder = wkbNDR): string =
+  var wkbWriter = newWkbWriter(byteOrder)
+  wkbWriter.write(mpg, byteOrder)
+  return wkbWriter.data.toHex
+
+proc toWkb*(gc: GeometryCollection, byteOrder: WkbByteOrder = wkbNDR): string =
+  var wkbWriter = newWkbWriter(byteOrder)
+  wkbWriter.write(gc, byteOrder)
+  return wkbWriter.data.toHex
+
 proc toWkb*(geo: Geometry, byteOrder: WkbByteOrder = wkbNDR): string =
   var wkbWriter = newWkbWriter(byteOrder)
   wkbWriter.write(geo, byteOrder)
-  return wkbWriter.data.toHex()
+  return wkbWriter.data.toHex

@@ -471,14 +471,14 @@ const wkbxsmpg =  "00"&
                   "4018000000000000"
 
 #  GeometryCollection
-let geometries = @[Geometry(kind: wkbPoint,
+let gc = @[Geometry(kind: wkbPoint,
                             pt: Point(coord: Coord(x: 1.0, y: 1.0))),
                    Geometry(kind: wkbLineString,
                             ls: LineString(coords: @[Coord(x: 1.0, y: 1.0),
                                                      Coord(x: 2.0, y: 2.0)
                                                     ]))
           ]
-let gcGeometry = Geometry(kind: wkbGeometryCollection, gc: geometries)
+let gcGeometry = Geometry(kind: wkbGeometryCollection, gc: gc)
 const wkbngc = "01"&
               "07000000"&#  GeometryCollection
               "02000000"&#  number of geometry

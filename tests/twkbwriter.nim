@@ -1,5 +1,5 @@
 import unittest
-import geometry, wkbwriter
+import nimgeo/[geometry, wkbwriter]
 
 include common
 

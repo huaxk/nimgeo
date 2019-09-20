@@ -1,6 +1,6 @@
 import unittest, endians
 
-import geometry
+import wkb/geometry
 
 suite "common tests":
   test "Endianness and WkbByteOrder comparison operation":

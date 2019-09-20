@@ -1,4 +1,4 @@
-import geometry
+import nimgeo/geometry
 
 # addHandler(newConsoleLogger(levelThreshold = lvlDebug))
 

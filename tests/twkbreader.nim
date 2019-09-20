@@ -1,6 +1,6 @@
 import unittest, logging
 
-import geometry, nimwkb
+import geometry, wkbreader
 
 include common
 

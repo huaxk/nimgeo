@@ -2,7 +2,7 @@
 
 version       = "0.1.0"
 author        = "huaxk"
-description   = "A new awesome nimble package"
+description   = "Read & Write WKB(Well Know Binary) in nim"
 license       = "MIT"
 srcDir        = "src"
 
@@ -10,4 +10,4 @@ srcDir        = "src"
 
 # Dependencies
 
-requires "nim >= 0.20.2"
+requires "nim >= 0.10.0"

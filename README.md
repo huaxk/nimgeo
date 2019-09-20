@@ -1,2 +1,2 @@
-# nimwkb
-Read &amp; Write Well Know Binary in nim
+# nimgeo
+Read & Write WKB(Well Know Binary) in nim

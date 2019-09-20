@@ -24,6 +24,8 @@ type
     srid*: uint32
     coord*: Coord
 
+  LinearRing* = seq[Coord]
+
   LineString* = ref LineStringObj
   LineStringObj = object
     srid*: uint32
@@ -32,7 +34,7 @@ type
   Polygon* = ref PolygonObj
   PolygonObj = object
     srid*: uint32
-    rings*: seq[seq[Coord]]
+    rings*: seq[LinearRing]
 
   MultiPoint* = ref MultiPointObj
   MultiPointObj = object

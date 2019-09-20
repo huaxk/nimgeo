@@ -1,3 +1,5 @@
-import wkb/wkbreader, wkb/wkbwriter
+import nimgeo/[geometry, wkbreader, wkbwriter]
 
+export Geometry, Point, LineString, Polygon,
+       MultiPoint, MultiLineString, MultiPolygon, GeometryCollection
 export parseWkb, toWkb

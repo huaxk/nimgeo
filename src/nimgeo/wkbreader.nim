@@ -18,7 +18,7 @@ proc parseEndian(str: cstring, pos: var int): WkbByteOrder =
   let c = (hexbyte(str[2 * pos]) shl 4) or hexbyte(str[2 * pos + 1])
   result = WkbByteOrder(c)
   inc(pos)
-  debug("end position: ", $(pos * 2), " -> ", $result)
+  # debug("end position: ", $(pos * 2), " -> ", $result)
 
 proc parseGeometryType(str: cstring, pos: var int, bswap: bool):
                       (WkbGeometryType, bool) =
@@ -35,7 +35,7 @@ proc parseGeometryType(str: cstring, pos: var int, bswap: bool):
   else:
     result[1] = false
   
-  debug("end position: ", $(pos * 2), " -> ", $result)
+  # debug("end position: ", $(pos * 2), " -> ", $result)
 
 proc parseuint32(str: cstring, pos: var int, bswap: bool): uint32 =
   var bytes = cast[cstring](addr result)
@@ -46,7 +46,7 @@ proc parseuint32(str: cstring, pos: var int, bswap: bool): uint32 =
   if bswap:
     swapEndian32(bytes)
   
-  debug("end position: ", $(pos * 2), " -> ", $result)
+  # debug("end position: ", $(pos * 2), " -> ", $result)
 
 proc parseCoord(str: cstring, pos: var int, bswap: bool): Coord =
   new(result)
@@ -59,8 +59,8 @@ proc parseCoord(str: cstring, pos: var int, bswap: bool): Coord =
     swapEndian64(addr result.x)
     swapEndian64(addr result.y)
 
-  debug("end position: ", $(pos * 2), " -> ",
-      "(", result.x, ",", result.y, ")") 
+  # debug("end position: ", $(pos * 2), " -> ",
+      # "(", result.x, ",", result.y, ")") 
 
 proc parseCoords(str: cstring, pos: var int, bswap: bool): seq[Coord] =
   let n = parseuint32(str, pos, bswap)
@@ -161,7 +161,7 @@ proc parseGeometry*(str: cstring, pos: var int, bswap = false): Geometry =
     return Geometry(kind: wkbType, gc: gc)
 
 proc parseWkb*(str: cstring): Geometry =
-  debug("WKB: ", str)
+  # debug("WKB: ", str)
   var pos = 0 #  解析的起点
   return parseGeometry(str, pos)
 

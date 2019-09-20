@@ -15,44 +15,44 @@ type
     wkbGeometryCollection
 
   Coord* = ref CoordObj
-  CoordObj* = object
+  CoordObj = object
     x*: float64
     y*: float64
 
   Point* = ref PointObj
-  PointObj* = object
+  PointObj = object
     srid*: uint32
     coord*: Coord
 
   LineString* = ref LineStringObj
-  LineStringObj* = object
+  LineStringObj = object
     srid*: uint32
     coords*: seq[Coord]
 
   Polygon* = ref PolygonObj
-  PolygonObj* = object
+  PolygonObj = object
     srid*: uint32
     rings*: seq[seq[Coord]]
 
   MultiPoint* = ref MultiPointObj
-  MultiPointObj* = object
+  MultiPointObj = object
     srid*: uint32
     points*: seq[Point]
 
   MultiLineString* = ref MultiLineStringObj
-  MultiLineStringObj* = object
+  MultiLineStringObj = object
     srid*: uint32
     linestrings*: seq[LineString]
 
   MultiPolygon* = ref MultiPolygonObj
-  MultiPolygonObj* = object
+  MultiPolygonObj = object
     srid*: uint32
     polygons*: seq[Polygon]
 
   GeometryCollection* = seq[Geometry] #  Todo: 可能出现自引用
 
   Geometry* = ref GeometryObj
-  GeometryObj* = object
+  GeometryObj = object
     case kind*: WkbGeometryType
     of wkbPoint:
       pt*: Point

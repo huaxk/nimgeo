@@ -121,7 +121,6 @@ proc parseGeometryCollection(str: cstring, pos: var int, bswap: bool):
     # result.geometries.add(geo)
     result.add(geo)
   
-
 proc parseGeometry*(str: cstring, pos: var int, bswap = false): Geometry =
   let endian = parseEndian(str, pos)
   #  littleEndian = 0, but wkbNDR = 1
@@ -165,4 +164,37 @@ proc parseWkb*(str: cstring): Geometry =
   var pos = 0 #  解析的起点
   return parseGeometry(str, pos)
 
+proc parseWkbPoint*(str: cstring): Point =
+  var geo = parseWkb(str)
+  doAssert(geo.kind == wkbPoint)
+  return geo.pt
 
+proc parseWkbLineString*(str: cstring): LineString =
+  var geo = parseWkb(str)
+  doAssert(geo.kind == wkbLineString)
+  return geo.ls
+
+proc parseWkbPolygon*(str: cstring): Polygon =
+  var geo = parseWkb(str)
+  doAssert(geo.kind == wkbPolygon)
+  return geo.pg
+
+proc parseWkbMultiPoint*(str: cstring): MultiPoint =
+  var geo = parseWkb(str)
+  doAssert(geo.kind == wkbMultiPoint)
+  return geo.mpt
+
+proc parseWkbMultiLineString*(str: cstring): MultiLineString =
+  var geo = parseWkb(str)
+  doAssert(geo.kind == wkbMultiLineString)
+  return geo.mls
+
+proc parseWkbMultiPolygon*(str: cstring): MultiPolygon =
+  var geo = parseWkb(str)
+  doAssert(geo.kind == wkbMultiPolygon)
+  return geo.mpg
+
+proc parseWkbGeometryCollection*(str: cstring): GeometryCollection =
+  var geo = parseWkb(str)
+  doAssert(geo.kind == wkbGeometryCollection)
+  return geo.gc

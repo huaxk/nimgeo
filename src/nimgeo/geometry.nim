@@ -107,3 +107,27 @@ proc `==`*(a, b: Geometry): bool =
     of wkbMultiPolygon: result = result and (a.mpg == b.mpg)
     of wkbGeometryCollection: result = result and (a.gc == b.gc)
       
+proc newPoint*(x, y: float, srid = 0): Geometry =
+  return Geometry(kind: wkbPoint,
+                  pt: Point(srid: srid.uint32, coord: Coord(x: x, y: y)))
+
+proc `srid=`*(geo: Geometry, srid: int) =
+  case geo.kind:
+  of wkbPoint: geo.pt.srid = srid.uint32
+  of wkbLineString: geo.ls.srid = srid.uint32
+  of wkbPolygon: geo.pg.srid = srid.uint32
+  of wkbMultiPoint: geo.mpt.srid = srid.uint32
+  of wkbMultiLineString: geo.mls.srid = srid.uint32
+  of wkbMultiPolygon: geo.mpg.srid = srid.uint32
+  else: discard
+  
+proc srid*(geo: Geometry): int =
+  case geo.kind:
+  of wkbPoint: return geo.pt.srid.int
+  of wkbLineString: return geo.ls.srid.int
+  of wkbPolygon: return geo.pg.srid.int
+  of wkbMultiPoint: return geo.mpt.srid.int
+  of wkbMultiLineString: return geo.mls.srid.int
+  of wkbMultiPolygon: return geo.mpg.srid.int
+  else: discard
+  

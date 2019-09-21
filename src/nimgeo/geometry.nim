@@ -19,12 +19,12 @@ type
     x*: float64
     y*: float64
 
+  LinearRing* = seq[Coord]
+
   Point* = ref PointObj
   PointObj = object
     srid*: uint32
     coord*: Coord
-
-  LinearRing* = seq[Coord]
 
   LineString* = ref LineStringObj
   LineStringObj = object
@@ -106,28 +106,45 @@ proc `==`*(a, b: Geometry): bool =
     of wkbMultiLineString: result = result and (a.mls == b.mls)
     of wkbMultiPolygon: result = result and (a.mpg == b.mpg)
     of wkbGeometryCollection: result = result and (a.gc == b.gc)
-      
-proc newPoint*(x, y: float, srid = 0): Geometry =
-  return Geometry(kind: wkbPoint,
-                  pt: Point(srid: srid.uint32, coord: Coord(x: x, y: y)))
 
-proc `srid=`*(geo: Geometry, srid: int) =
+proc newCoord*(x, y: float64): Coord =
+  return Coord(x: x, y: y)
+
+proc newPoint*(x, y: float64): Point =
+  return Point(coord: newCoord(x, y))
+
+proc newLineString*(coords: seq[Coord]): LineString =
+  return LineString(coords: coords)
+
+proc newPolygon*(rings: seq[LinearRing]): Polygon =
+  return Polygon(rings: rings)
+
+proc newMultiPoint*(mpt: seq[Point]): MultiPoint =
+  return MultiPoint(points: mpt)
+
+proc newMultiLineString*(linestrings: seq[LineString]): MultiLineString =
+  return MultiLineString(linestrings: linestrings)
+
+proc newMultiPolygon*(polygons: seq[Polygon]): MultiPolygon =
+  return MultiPolygon(polygons: polygons)
+
+proc `srid=`*(geo: Geometry, srid: uint32) =
   case geo.kind:
-  of wkbPoint: geo.pt.srid = srid.uint32
-  of wkbLineString: geo.ls.srid = srid.uint32
-  of wkbPolygon: geo.pg.srid = srid.uint32
-  of wkbMultiPoint: geo.mpt.srid = srid.uint32
-  of wkbMultiLineString: geo.mls.srid = srid.uint32
-  of wkbMultiPolygon: geo.mpg.srid = srid.uint32
-  else: discard
+  of wkbPoint: geo.pt.srid = srid
+  of wkbLineString: geo.ls.srid = srid
+  of wkbPolygon: geo.pg.srid = srid
+  of wkbMultiPoint: geo.mpt.srid = srid
+  of wkbMultiLineString: geo.mls.srid = srid
+  of wkbMultiPolygon: geo.mpg.srid = srid
+  else: doAssert(false, "GeometryCollection can not set srid")
   
-proc srid*(geo: Geometry): int =
+proc srid*(geo: Geometry): uint32 =
   case geo.kind:
-  of wkbPoint: return geo.pt.srid.int
-  of wkbLineString: return geo.ls.srid.int
-  of wkbPolygon: return geo.pg.srid.int
-  of wkbMultiPoint: return geo.mpt.srid.int
-  of wkbMultiLineString: return geo.mls.srid.int
-  of wkbMultiPolygon: return geo.mpg.srid.int
-  else: discard
+  of wkbPoint: return geo.pt.srid
+  of wkbLineString: return geo.ls.srid
+  of wkbPolygon: return geo.pg.srid
+  of wkbMultiPoint: return geo.mpt.srid
+  of wkbMultiLineString: return geo.mls.srid
+  of wkbMultiPolygon: return geo.mpg.srid
+  else: doAssert(false, "GeometryCollection has no srid")
   

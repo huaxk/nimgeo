@@ -4,7 +4,7 @@ import nimgeo/[geometry, wkbreader]
 
 include common
 
-suite "wkb hex to Geometry":
+suite "parse wkb hex to Geometry":
   test "parse Geometry Point from wkb hex":
     check parseWkb(wkbnpt) == ptGeometry
     check parseWkb(wkbnspt) == sptGeometry

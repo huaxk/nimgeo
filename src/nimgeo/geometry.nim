@@ -150,3 +150,8 @@ proc srid*(geo: Geometry): uint32 =
   
 proc `$`*(coord: Coord): string =
   return "(" & $coord.x & " " & $coord.y & ")"
+
+proc `$`*(pt: Point): string =
+  if pt.srid != 0:
+    result = "sird=" & $pt.srid & "; "
+  result &= "POINT" & $pt.coord

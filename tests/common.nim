@@ -10,6 +10,8 @@ let pt = Point(coord: ptCoord)
 let spt = Point(srid: srid, coord: ptCoord)
 let ptGeometry = Geometry(kind: wkbPoint, pt: pt)
 let sptGeometry = Geometry(kind: wkbPoint, pt: spt)
+const wktpt = "POINT(1.0 2.0)"
+const wktspt = "SRID=4326; POINT(1.0 2.0)"
 const wkbnpt = "01"&# little endian
                "01000000"&
                "000000000000F03F"&
@@ -36,6 +38,8 @@ let ls = LineString(coords: coords)
 let sls = LineString(srid: srid, coords: coords)
 let lsGeometry = Geometry(kind: wkbLineString, ls: ls)
 let slsGeometry = Geometry(kind: wkbLineString, ls: sls)
+const wktls = "LINESTRING(1.0 1.0, 2.0 2.0)"
+const wktsls = "SRID=4326; LINESTRING(1.0 1.0, 2.0 2.0)"
 const wkbnls = "01"&
                "02000000"&
                "02000000"&
@@ -81,6 +85,9 @@ let pg = Polygon(rings: rings)
 let spg = Polygon(srid: srid, rings: rings)
 let pgGeometry = Geometry(kind: wkbPolygon, pg: pg)
 let spgGeometry = Geometry(kind: wkbPolygon, pg: spg)
+const wktring = "(1.0 1.0, 2.0 2.0, 3.0 3.0, 1.0 1.0), (4.0 4.0, 5.0 5.0, 6.0 6.0, 4.0 4.0)"
+const wktpg = "POLYGON((1.0 1.0, 2.0 2.0, 3.0 3.0, 1.0 1.0), (4.0 4.0, 5.0 5.0, 6.0 6.0, 4.0 4.0))"
+const wktspg = "SRID=4326; POLYGON((1.0 1.0, 2.0 2.0, 3.0 3.0, 1.0 1.0), (4.0 4.0, 5.0 5.0, 6.0 6.0, 4.0 4.0))"
 const wkbnpg = "01"&
                "03000000"&
                "02000000"&# number of rings
@@ -176,6 +183,8 @@ let mpt = MultiPoint(points: points)
 let smpt = MultiPoint(srid: srid, points: points)
 let mptGeometry = Geometry(kind: wkbMultiPoint, mpt: mpt)
 let smptGeometry = Geometry(kind: wkbMultiPoint, mpt: smpt)
+const wktmpt = "MULTIPOINT(1.0 1.0, 2.0 2.0)"
+const wktsmpt = "SRID=4326; MULTIPOINT(1.0 1.0, 2.0 2.0)"
 const wkbnmpt = "01"&
                 "04000000"&
                 "02000000"&# number of point
@@ -235,6 +244,8 @@ let mls = MultiLineString(linestrings: lss)
 let smls = MultiLineString(srid: srid, linestrings: lss)
 let mlsGeometry = Geometry(kind: wkbMultiLineString, mls: mls)
 let smlsGeometry = Geometry(kind: wkbMultiLineString, mls: smls)
+const wktmls = "MULTIlINESTRING((1.0 1.0, 2.0 2.0), (3.0 3.0, 4.0 4.0))"
+const wktsmls = "SRID=4326; MULTIlINESTRING((1.0 1.0, 2.0 2.0), (3.0 3.0, 4.0 4.0))"
 const wkbnmls = "01"&
                 "05000000"&
                 "02000000"&# number of LineString
@@ -323,6 +334,8 @@ let mpg = MultiPolygon(polygons: polygons)
 let smpg = MultiPolygon(srid: srid, polygons: polygons)
 let mpgGeometry = Geometry(kind: wkbMultiPolygon, mpg: mpg)
 let smpgGeometry = Geometry(kind: wkbMultiPolygon, mpg: smpg)
+const wktmpg = "MULTIPOLYGON(((1.0 1.0, 2.0 2.0, 3.0 3.0, 1.0 1.0)), ((3.0 3.0, 4.0 4.0, 5.0 5.0, 3.0 3.0), (6.0 6.0, 7.0 7.0, 8.0 8.0, 6.0 6.0)))"
+const wktsmpg = "SRID=4326; MULTIPOLYGON(((1.0 1.0, 2.0 2.0, 3.0 3.0, 1.0 1.0)), ((3.0 3.0, 4.0 4.0, 5.0 5.0, 3.0 3.0), (6.0 6.0, 7.0 7.0, 8.0 8.0, 6.0 6.0)))"
 const wkbnmpg = "01"&
                 "06000000"&
                 "02000000"&# number of Ploygon
@@ -479,6 +492,7 @@ let gc = @[Geometry(kind: wkbPoint,
                                            ]))
           ]
 let gcGeometry = Geometry(kind: wkbGeometryCollection, gc: gc)
+const wktgc = "GEOMETRYCOLLECTION(POINT(1.0 1.0), LINESTRING(1.0 1.0, 2.0 2.0))"
 const wkbngc = "01"&
               "07000000"&#  GeometryCollection
               "02000000"&#  number of geometry

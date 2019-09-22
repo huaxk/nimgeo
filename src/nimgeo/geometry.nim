@@ -54,7 +54,7 @@ type
   GeometryCollection* = seq[Geometry] #  Todo: 可能出现自引用
 
   Geometry* = ref GeometryObj
-  GeometryObj = object
+  GeometryObj {.acyclic.} = object
     case kind*: WkbGeometryType
     of wkbPoint:
       pt*: Point

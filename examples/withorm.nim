@@ -25,11 +25,11 @@ when isMainModule:
     )
     city.insert()
     echo city.id
-    echo city.position.coord
   
   withDb:
     let city = City.getOne(1)
-    echo repr city
+    echo city.name
+    echo city.position
 
   withDb:
     dropTables()

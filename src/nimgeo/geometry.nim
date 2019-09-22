@@ -147,11 +147,3 @@ proc srid*(geo: Geometry): uint32 =
   of wkbMultiLineString: return geo.mls.srid
   of wkbMultiPolygon: return geo.mpg.srid
   else: doAssert(false, "GeometryCollection has no srid")
-  
-proc `$`*(coord: Coord): string =
-  return "(" & $coord.x & " " & $coord.y & ")"
-
-proc `$`*(pt: Point): string =
-  if pt.srid != 0:
-    result = "sird=" & $pt.srid & "; "
-  result &= "POINT" & $pt.coord

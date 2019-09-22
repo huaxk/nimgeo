@@ -128,3 +128,12 @@ proc toWkt*(gc: GeometryCollection): string =
       result &= gc[i].toWkt
     inc(i)
   result &= ")"
+
+proc `$`*(pt: Point): string = pt.toWkt
+proc `$`*(ls: LineString): string = ls.toWkt
+proc `$`*(pg: Polygon): string = pg.toWkt
+proc `$`*(mpt: MultiPoint): string = mpt.toWkt
+proc `$`*(mls: MultiLineString): string = mls.toWkt
+proc `$`*(mpg: MultiPolygon): string = mpg.toWkt
+proc `$`*(gc: GeometryCollection): string = gc.toWkt
+  

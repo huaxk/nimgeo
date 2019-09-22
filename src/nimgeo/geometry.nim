@@ -148,3 +148,5 @@ proc srid*(geo: Geometry): uint32 =
   of wkbMultiPolygon: return geo.mpg.srid
   else: doAssert(false, "GeometryCollection has no srid")
   
+proc `$`*(coord: Coord): string =
+  return "(" & $coord.x & " " & $coord.y & ")"

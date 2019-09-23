@@ -128,6 +128,24 @@ proc newMultiLineString*(linestrings: seq[LineString]): MultiLineString =
 proc newMultiPolygon*(polygons: seq[Polygon]): MultiPolygon =
   return MultiPolygon(polygons: polygons)
 
+proc hasSrid*(pt: Point): bool =
+  return pt.srid != 0
+
+proc hasSrid*(ls: LineString): bool =
+  return ls.srid != 0
+
+proc hasSrid*(pg: Polygon): bool =
+  return pg.srid != 0
+
+proc hasSrid*(mpt: MultiPoint): bool =
+  return mpt.srid != 0
+
+proc hasSrid*(mls: MultiLineString): bool =
+  return mls.srid != 0
+
+proc hasSrid*(mpg: MultiPolygon): bool =
+  return mpg.srid != 0
+
 proc `srid=`*(geo: Geometry, srid: uint32) =
   case geo.kind:
   of wkbPoint: geo.pt.srid = srid

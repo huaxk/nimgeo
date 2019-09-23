@@ -1,38 +1,32 @@
 import json, unittest
 
-import nimgeo
+import nimgeo/geojson
 include common
 
-proc `%`(coord: Coord): JsonNode =
-  result = newJArray()
-  result.add(%coord.x)
-  result.add(%coord.y)
+suite "format Geometry to geojson":
+  test "Point to GeoJson":
+    check $(%*pt) == jsonpt
+    check $(%*spt) == jsonspt
+  
+  test "LineString to GeoJson":
+    check $(%*ls) == jsonls
+    check $(%*sls) == jsonsls
 
-proc `%`*(pt: Point): JsonNode =
-  result = newJObject()
-  result["type"] = %"Point"
-  result["coordinates"] = %pt.coord
+  test "Polygon to GeoJson":
+    check $(%*pg) == jsonpg
+    check $(%*spg) == jsonspg
 
-proc `%`*(ls: LineString): JsonNode =
-  result = newJObject()
-  result["type"] = %"LineString"
-  result["coordinates"] = newJArray()
-  for coord in ls.coords:
-    result["coordinates"].add(%coord)
+  test "MultiPoint to GeoJson":
+    check $(%*mpt) == jsonmpt
+    check $(%*smpt) == jsonsmpt
 
-proc `%`*(pg: Polygon): JsonNode =
-  result = newJObject()
-  result["type"] = %"Polygon"
-  result["coordinates"] = newJArray()
-  for ring in pg.rings:
-    var ringNode = newJArray()
-    for coord in ring:
-      ringNode.add(%coord)
-    result["coordinates"].add(ringNode)
+  test "MultiLine to GeoJson":
+    check $(%*mls) == jsonmls
+    check $(%*smls) == jsonsmls
 
+  test "MultiPolygon to GeoJson":
+    check $(%*mpg) == jsonmpg
+    check $(%*smpg) == jsonsmpg
 
-suite "geojson":
-  test "geojson":
-    echo %*pt
-    echo %*ls
-    echo %*pg
+  test "GeometryCollection to GeoJson":
+    check $(%*gc) == jsongc

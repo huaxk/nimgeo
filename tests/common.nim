@@ -12,6 +12,8 @@ let ptGeometry = Geometry(kind: wkbPoint, pt: pt)
 let sptGeometry = Geometry(kind: wkbPoint, pt: spt)
 const wktpt = "POINT(1.0 2.0)"
 const wktspt = "SRID=4326; POINT(1.0 2.0)"
+const jsonpt = """{"type":"Point","coordinates":[1.0,2.0]}"""
+const jsonspt = """{"type":"Point","coordinates":[1.0,2.0],"crs":{"type":"name","properties":{"name":"EPSG:4326"}}}"""
 const wkbnpt = "01"&# little endian
                "01000000"&
                "000000000000F03F"&
@@ -40,6 +42,8 @@ let lsGeometry = Geometry(kind: wkbLineString, ls: ls)
 let slsGeometry = Geometry(kind: wkbLineString, ls: sls)
 const wktls = "LINESTRING(1.0 1.0, 2.0 2.0)"
 const wktsls = "SRID=4326; LINESTRING(1.0 1.0, 2.0 2.0)"
+const jsonls = """{"type":"LineString","coordinates":[[1.0,1.0],[2.0,2.0]]}"""
+const jsonsls = """{"type":"LineString","coordinates":[[1.0,1.0],[2.0,2.0]],"crs":{"type":"name","properties":{"name":"EPSG:4326"}}}"""
 const wkbnls = "01"&
                "02000000"&
                "02000000"&
@@ -88,6 +92,8 @@ let spgGeometry = Geometry(kind: wkbPolygon, pg: spg)
 const wktring = "(1.0 1.0, 2.0 2.0, 3.0 3.0, 1.0 1.0), (4.0 4.0, 5.0 5.0, 6.0 6.0, 4.0 4.0)"
 const wktpg = "POLYGON((1.0 1.0, 2.0 2.0, 3.0 3.0, 1.0 1.0), (4.0 4.0, 5.0 5.0, 6.0 6.0, 4.0 4.0))"
 const wktspg = "SRID=4326; POLYGON((1.0 1.0, 2.0 2.0, 3.0 3.0, 1.0 1.0), (4.0 4.0, 5.0 5.0, 6.0 6.0, 4.0 4.0))"
+const jsonpg = """{"type":"Polygon","coordinates":[[[1.0,1.0],[2.0,2.0],[3.0,3.0],[1.0,1.0]],[[4.0,4.0],[5.0,5.0],[6.0,6.0],[4.0,4.0]]]}"""
+const jsonspg = """{"type":"Polygon","coordinates":[[[1.0,1.0],[2.0,2.0],[3.0,3.0],[1.0,1.0]],[[4.0,4.0],[5.0,5.0],[6.0,6.0],[4.0,4.0]]],"crs":{"type":"name","properties":{"name":"EPSG:4326"}}}"""
 const wkbnpg = "01"&
                "03000000"&
                "02000000"&# number of rings
@@ -185,6 +191,8 @@ let mptGeometry = Geometry(kind: wkbMultiPoint, mpt: mpt)
 let smptGeometry = Geometry(kind: wkbMultiPoint, mpt: smpt)
 const wktmpt = "MULTIPOINT(1.0 1.0, 2.0 2.0)"
 const wktsmpt = "SRID=4326; MULTIPOINT(1.0 1.0, 2.0 2.0)"
+const jsonmpt = """{"type":"MultiPoint","coordinates":[[1.0,1.0],[2.0,2.0]]}"""
+const jsonsmpt = """{"type":"MultiPoint","coordinates":[[1.0,1.0],[2.0,2.0]],"crs":{"type":"name","properties":{"name":"EPSG:4326"}}}"""
 const wkbnmpt = "01"&
                 "04000000"&
                 "02000000"&# number of point
@@ -246,6 +254,8 @@ let mlsGeometry = Geometry(kind: wkbMultiLineString, mls: mls)
 let smlsGeometry = Geometry(kind: wkbMultiLineString, mls: smls)
 const wktmls = "MULTIlINESTRING((1.0 1.0, 2.0 2.0), (3.0 3.0, 4.0 4.0))"
 const wktsmls = "SRID=4326; MULTIlINESTRING((1.0 1.0, 2.0 2.0), (3.0 3.0, 4.0 4.0))"
+const jsonmls = """{"type":"MultiLineString","coordinates":[[[1.0,1.0],[2.0,2.0]],[[3.0,3.0],[4.0,4.0]]]}"""
+const jsonsmls = """{"type":"MultiLineString","coordinates":[[[1.0,1.0],[2.0,2.0]],[[3.0,3.0],[4.0,4.0]]],"crs":{"type":"name","properties":{"name":"EPSG:4326"}}}"""
 const wkbnmls = "01"&
                 "05000000"&
                 "02000000"&# number of LineString
@@ -336,6 +346,8 @@ let mpgGeometry = Geometry(kind: wkbMultiPolygon, mpg: mpg)
 let smpgGeometry = Geometry(kind: wkbMultiPolygon, mpg: smpg)
 const wktmpg = "MULTIPOLYGON(((1.0 1.0, 2.0 2.0, 3.0 3.0, 1.0 1.0)), ((3.0 3.0, 4.0 4.0, 5.0 5.0, 3.0 3.0), (6.0 6.0, 7.0 7.0, 8.0 8.0, 6.0 6.0)))"
 const wktsmpg = "SRID=4326; MULTIPOLYGON(((1.0 1.0, 2.0 2.0, 3.0 3.0, 1.0 1.0)), ((3.0 3.0, 4.0 4.0, 5.0 5.0, 3.0 3.0), (6.0 6.0, 7.0 7.0, 8.0 8.0, 6.0 6.0)))"
+const jsonmpg = """{"type":"MultiPolygon","coordinates":[[[[1.0,1.0],[2.0,2.0],[3.0,3.0],[1.0,1.0]]],[[[3.0,3.0],[4.0,4.0],[5.0,5.0],[3.0,3.0]],[[6.0,6.0],[7.0,7.0],[8.0,8.0],[6.0,6.0]]]]}"""
+const jsonsmpg = """{"type":"MultiPolygon","coordinates":[[[[1.0,1.0],[2.0,2.0],[3.0,3.0],[1.0,1.0]]],[[[3.0,3.0],[4.0,4.0],[5.0,5.0],[3.0,3.0]],[[6.0,6.0],[7.0,7.0],[8.0,8.0],[6.0,6.0]]]],"crs":{"type":"name","properties":{"name":"EPSG:4326"}}}"""
 const wkbnmpg = "01"&
                 "06000000"&
                 "02000000"&# number of Ploygon
@@ -493,6 +505,7 @@ let gc = @[Geometry(kind: wkbPoint,
           ]
 let gcGeometry = Geometry(kind: wkbGeometryCollection, gc: gc)
 const wktgc = "GEOMETRYCOLLECTION(POINT(1.0 1.0), LINESTRING(1.0 1.0, 2.0 2.0))"
+const jsongc = """{"type":"GeometryCollection","geometries":[{"type":"Point","coordinates":[1.0,1.0]},{"type":"LineString","coordinates":[[1.0,1.0],[2.0,2.0]]}]}"""
 const wkbngc = "01"&
               "07000000"&#  GeometryCollection
               "02000000"&#  number of geometry

@@ -42,83 +42,83 @@ suite "utility procedure for writing to wkb ":
               "0000000000000040"
     check x.toHex == s
 
-suite "Geometry to wkb hex":
-  test "write Point to wkb":
+suite "write Geometry to wkb hex":
+  test "Point to wkb":
     check pt.toWkb(wkbNDR) == wkbnpt
     check pt.toWkb(wkbXDR) == wkbxpt
     check spt.toWkb(wkbNDR) == wkbnspt
     check spt.toWkb(wkbXDR) == wkbxspt
 
-  test "write Geometry Point to wkb":
+  test "Geometry Point to wkb":
     check ptGeometry.toWkb(wkbNDR) == wkbnpt
     check ptGeometry.toWkb(wkbXDR) == wkbxpt
     check sptGeometry.toWkb(wkbNDR) == wkbnspt
     check sptGeometry.toWkb(wkbXDR) == wkbxspt
 
-  test "write LineString to wkb":
+  test "LineString to wkb":
     check ls.toWkb(wkbNDR) == wkbnls
     check ls.toWkb(wkbXDR) == wkbxls
     check sls.toWkb(wkbNDR) == wkbnsls
     check sls.toWkb(wkbXDR) == wkbxsls
 
-  test "write Geometry LineString to wkb":
+  test "Geometry LineString to wkb":
     check lsGeometry.toWkb(wkbNDR) == wkbnls
     check lsGeometry.toWkb(wkbXDR) == wkbxls
     check slsGeometry.toWkb(wkbNDR) == wkbnsls
     check slsGeometry.toWkb(wkbXDR) == wkbxsls
 
-  test "write LineString to wkb":
+  test "LineString to wkb":
     check pg.toWkb(wkbNDR) == wkbnpg
     check pg.toWkb(wkbXDR) == wkbxpg
     check spg.toWkb(wkbNDR) == wkbnspg
     check spg.toWkb(wkbXDR) == wkbxspg
 
-  test "write Geometry Polygon to wkb":
+  test "Polygon to wkb":
     check pgGeometry.toWkb(wkbNDR) == wkbnpg
     check pgGeometry.toWkb(wkbXDR) == wkbxpg
     check spgGeometry.toWkb(wkbNDR) == wkbnspg
     check spgGeometry.toWkb(wkbXDR) == wkbxspg
 
-  test "write MultiPoint to wkb":
+  test "MultiPoint to wkb":
     check mpt.toWkb(wkbNDR) == wkbnmpt
     check mpt.toWkb(wkbXDR) == wkbxmpt
     check smpt.toWkb(wkbNDR) == wkbnsmpt
     check smpt.toWkb(wkbXDR) == wkbxsmpt
 
-  test "write Geometry MultiPoint to wkb":
+  test "Geometry MultiPoint to wkb":
     check mptGeometry.toWkb(wkbNDR) == wkbnmpt
     check mptGeometry.toWkb(wkbXDR) == wkbxmpt
     check smptGeometry.toWkb(wkbNDR) == wkbnsmpt
     check smptGeometry.toWkb(wkbXDR) == wkbxsmpt
 
-  test "write MultiLineString to wkb":
+  test "MultiLineString to wkb":
     check mls.toWkb(wkbNDR) == wkbnmls
     check mls.toWkb(wkbXDR) == wkbxmls
     check smls.toWkb(wkbNDR) == wkbnsmls
     check smls.toWkb(wkbXDR) == wkbxsmls
 
-  test "write Geometry MultiLineString to wkb":
+  test "Geometry MultiLineString to wkb":
     check mlsGeometry.toWkb(wkbNDR) == wkbnmls
     check mlsGeometry.toWkb(wkbXDR) == wkbxmls
     check smlsGeometry.toWkb(wkbNDR) == wkbnsmls
     check smlsGeometry.toWkb(wkbXDR) == wkbxsmls
   
-  test "write MultiPolygon to wkb":
+  test "MultiPolygon to wkb":
     check mpg.toWkb(wkbNDR) == wkbnmpg
     check mpg.toWkb(wkbXDR) == wkbxmpg
     check smpg.toWkb(wkbNDR) == wkbnsmpg
     check smpg.toWkb(wkbXDR) == wkbxsmpg
   
-  test "write Geometry MultiPolygon to wkb":
+  test "Geometry MultiPolygon to wkb":
     check mpgGeometry.toWkb(wkbNDR) == wkbnmpg
     check mpgGeometry.toWkb(wkbXDR) == wkbxmpg
     check smpgGeometry.toWkb(wkbNDR) == wkbnsmpg
     check smpgGeometry.toWkb(wkbXDR) == wkbxsmpg
 
-  test "write GeometryCollection to wkb":
+  test "GeometryCollection to wkb":
     check gc.toWkb(wkbNDR) == wkbngc
     check gc.toWkb(wkbXDR) == wkbxgc
 
-  test "write GeometryCollection to wkb":
+  test "Geometry GeometryCollection to wkb":
     check gcGeometry.toWkb(wkbNDR) == wkbngc
     check gcGeometry.toWkb(wkbXDR) == wkbxgc
